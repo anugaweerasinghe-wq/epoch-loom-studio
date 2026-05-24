@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 export function ClassSilhouette({
   variant,
   color,
@@ -6,7 +8,7 @@ export function ClassSilhouette({
   color: string;
 }) {
   // Each class gets a distinct angular silhouette
-  const paths: Record<string, JSX.Element> = {
+  const paths: Record<string, ReactElement> = {
     starbreaker: (
       <g>
         {/* Heavy titan */}
