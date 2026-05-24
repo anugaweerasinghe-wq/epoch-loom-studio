@@ -1,26 +1,48 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Navbar } from "@/components/Navbar";
+import { Hero } from "@/components/sections/Hero";
+import { Story } from "@/components/sections/Story";
+import { Features } from "@/components/sections/Features";
+import { Classes } from "@/components/sections/Classes";
+import { Stats } from "@/components/sections/Stats";
+import { Media } from "@/components/sections/Media";
+import { Editions } from "@/components/sections/Editions";
+import { Community } from "@/components/sections/Community";
+import { Footer } from "@/components/sections/Footer";
+import { CustomCursor } from "@/components/CustomCursor";
+import { SITE_CONTENT } from "@/config/content";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      {
+        title: `${SITE_CONTENT.game.title}: ${SITE_CONTENT.game.subtitle} — Official Site`,
+      },
+      { name: "description", content: SITE_CONTENT.game.description },
+      {
+        property: "og:title",
+        content: `${SITE_CONTENT.game.title}: ${SITE_CONTENT.game.subtitle}`,
+      },
+      { property: "og:description", content: SITE_CONTENT.game.tagline },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <main className="relative">
+      <CustomCursor />
+      <Navbar />
+      <Hero />
+      <Story />
+      <Features />
+      <Classes />
+      <Stats />
+      <Media />
+      <Editions />
+      <Community />
+      <Footer />
+    </main>
+  );
 }
