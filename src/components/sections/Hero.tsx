@@ -1,19 +1,8 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
 import { SITE_CONTENT } from "@/config/content";
 import { WarriorSilhouette } from "@/components/svg/WarriorSilhouette";
-import { useMouseParallax } from "@/hooks/useMouseParallax";
-
-function useIsMobile() {
-  const r = useRef(false);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      r.current = window.matchMedia("(max-width: 640px)").matches;
-    }
-  }, []);
-  return r.current;
-}
+import { PREMIUM_EASE } from "@/lib/motion";
 
 function generateStars(count: number, seed = 1) {
   let s = seed;
@@ -25,47 +14,16 @@ function generateStars(count: number, seed = 1) {
     id: i,
     x: rand() * 100,
     y: rand() * 100,
-    size: rand() < 0.85 ? 1 : 2,
-    opacity: 0.3 + rand() * 0.7,
-    blue: rand() < 0.4,
+    size: rand() < 0.9 ? 1 : 2,
+    opacity: 0.3 + rand() * 0.2,
     delay: rand() * 4,
   }));
 }
 
-function StarLayer({
-  count,
-  seed,
-  parallaxRate,
-  parallax,
-}: {
-  count: number;
-  seed: number;
-  parallaxRate: number;
-  parallax: React.MutableRefObject<{ x: number; y: number }>;
-}) {
-  const stars = useMemo(() => generateStars(count, seed), [count, seed]);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    let raf = 0;
-    const loop = () => {
-      if (ref.current) {
-        const x = parallax.current.x * parallaxRate * 30;
-        const y = parallax.current.y * parallaxRate * 30;
-        ref.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [parallax, parallaxRate]);
-
+function StarField({ count }: { count: number }) {
+  const stars = useMemo(() => generateStars(count, 1), [count]);
   return (
-    <div
-      ref={ref}
-      className="absolute inset-0"
-      style={{ willChange: "transform" }}
-    >
+    <div className="absolute inset-0">
       {stars.map((s) => (
         <div
           key={s.id}
@@ -76,10 +34,10 @@ function StarLayer({
               top: `${s.y}%`,
               width: s.size,
               height: s.size,
-              background: s.blue ? "#4fc3f7" : "#ffffff",
+              background: "#8892b0",
               opacity: s.opacity,
               "--star-op": s.opacity,
-              animation: `twinkle ${3 + s.delay}s ease-in-out ${s.delay}s infinite`,
+              animation: `twinkle ${4 + s.delay}s ease-in-out ${s.delay}s infinite`,
             } as React.CSSProperties
           }
         />
@@ -89,101 +47,40 @@ function StarLayer({
 }
 
 export function Hero() {
-  const isMobile = useIsMobile();
-  const parallax = useMouseParallax();
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const warriorRef = useRef<HTMLDivElement>(null);
-
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    let raf = 0;
-    const loop = () => {
-      if (titleRef.current) {
-        const x = parallax.current.x * -0.01 * 30;
-        const y = parallax.current.y * -0.01 * 30;
-        titleRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      }
-      if (warriorRef.current) {
-        const x = parallax.current.x * 0.03 * 30;
-        const y = parallax.current.y * 0.03 * 30;
-        warriorRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [parallax]);
+    if (typeof window !== "undefined") {
+      setIsMobile(window.matchMedia("(max-width: 640px)").matches);
+    }
+  }, []);
 
-  const title = SITE_CONTENT.game.title;
-  const titleLetters = title.split("");
-  const starCounts = isMobile ? [120, 100, 80] : [900, 700, 400];
+  const starCount = isMobile ? 200 : 800;
 
   return (
     <section
-      id="top"
       className="relative flex min-h-screen w-full items-center justify-center overflow-hidden"
       style={{ background: "var(--void-black)" }}
     >
-      {/* Z1: Star layers */}
-      <StarLayer count={starCounts[0]} seed={1} parallaxRate={0.5} parallax={parallax} />
-      <StarLayer count={starCounts[1]} seed={2} parallaxRate={1} parallax={parallax} />
-      <StarLayer count={starCounts[2]} seed={3} parallaxRate={1.5} parallax={parallax} />
+      {/* Star field */}
+      <StarField count={starCount} />
 
-      {/* Z2: Central radial glow */}
+      {/* Soft central glow — barely there */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 80vw 60vw at 50% 60%, rgba(124,77,255,0.25), transparent 70%)",
+            "radial-gradient(ellipse 100vw 80vw at 50% 60%, rgba(124,77,255,0.10), transparent 70%)",
+          animation: "ambient-drift 24s ease-in-out infinite",
         }}
       />
 
-      {/* Z3: Light beams */}
-      <svg
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        preserveAspectRatio="none"
-        viewBox="0 0 100 100"
-        aria-hidden
-      >
-        <defs>
-          <linearGradient id="beam1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="rgba(79,195,247,0)" />
-            <stop offset="50%" stopColor="rgba(79,195,247,0.35)" />
-            <stop offset="100%" stopColor="rgba(79,195,247,0)" />
-          </linearGradient>
-        </defs>
-        <line
-          x1="50"
-          y1="60"
-          x2="0"
-          y2="0"
-          stroke="url(#beam1)"
-          strokeWidth="0.3"
-          style={{
-            animation: "beam-shimmer 4s ease-in-out infinite",
-          }}
-        />
-        <line
-          x1="50"
-          y1="60"
-          x2="100"
-          y2="0"
-          stroke="url(#beam1)"
-          strokeWidth="0.3"
-          style={{
-            animation: "beam-shimmer 4s ease-in-out 2s infinite",
-          }}
-        />
-      </svg>
-
-      {/* Z4: Ambient orbs */}
+      {/* Whisper orbs */}
       {!isMobile && (
         <>
           {[
-            { l: "10%", t: "20%", s: 180, c: "#7c4dff", a: "drift-1 18s ease-in-out infinite" },
-            { l: "85%", t: "30%", s: 140, c: "#4fc3f7", a: "drift-2 22s ease-in-out infinite" },
-            { l: "20%", t: "75%", s: 200, c: "#ff5252", a: "drift-3 26s ease-in-out infinite" },
-            { l: "75%", t: "70%", s: 160, c: "#ffd54f", a: "drift-1 24s ease-in-out 4s infinite" },
-            { l: "50%", t: "10%", s: 130, c: "#ce93d8", a: "drift-2 28s ease-in-out 2s infinite" },
+            { l: "12%", t: "22%", s: 220, c: "#7c4dff" },
+            { l: "82%", t: "30%", s: 180, c: "#4fc3f7" },
+            { l: "50%", t: "75%", s: 200, c: "#ce93d8" },
           ].map((o, i) => (
             <div
               key={i}
@@ -194,43 +91,36 @@ export function Hero() {
                 width: o.s,
                 height: o.s,
                 background: o.c,
-                opacity: 0.18,
-                filter: "blur(80px)",
-                animation: o.a,
-                willChange: "transform",
+                opacity: 0.07,
+                filter: "blur(100px)",
               }}
             />
           ))}
         </>
       )}
 
-      {/* Z5: Perspective grid floor */}
-      <div
-        className="pointer-events-none absolute bottom-0 left-1/2 h-[60vh] w-[200vw] -translate-x-1/2 opacity-40"
-        style={{
-          background:
-            "repeating-linear-gradient(0deg, transparent 0, transparent 59px, rgba(79,195,247,0.3) 60px), repeating-linear-gradient(90deg, transparent 0, transparent 59px, rgba(79,195,247,0.3) 60px)",
-          transformOrigin: "center bottom",
-          animation: "grid-scroll 3s linear infinite",
-          maskImage:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%)",
-          WebkitMaskImage:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%)",
-        }}
-      />
-
-      {/* Z6: Warrior silhouette */}
+      {/* Warrior silhouette */}
       {!isMobile && (
         <div
-          ref={warriorRef}
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[40%] opacity-70"
-          style={{ height: 500, willChange: "transform" }}
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          style={{ height: 280 }}
         >
+          {/* Slow orbiting ring */}
+          <div
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              width: 360,
+              height: 360,
+              border: "1px solid rgba(255,255,255,0.15)",
+              animation: "ring-spin 60s linear infinite",
+            }}
+          />
           <div
             style={{
-              animation: "float-y 4s ease-in-out infinite",
+              animation: "float-y 6s ease-in-out infinite",
               willChange: "transform",
               height: "100%",
+              filter: "drop-shadow(0 0 20px rgba(79,195,247,0.25))",
             }}
           >
             <WarriorSilhouette />
@@ -242,163 +132,101 @@ export function Hero() {
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-40"
         style={{
-          background:
-            "linear-gradient(to bottom, transparent, var(--void-black))",
+          background: "linear-gradient(to bottom, transparent, var(--void-black))",
         }}
       />
 
       {/* Text layer */}
-      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="font-mono-ui text-[10px] uppercase tracking-[0.35em]"
-          style={{ color: "var(--plasma-cyan)" }}
-        >
-          ◆ {SITE_CONTENT.hero.preTitle} ◆
-        </motion.div>
-
-        <h1
-          ref={titleRef}
-          className="font-display mt-5 font-bold leading-[0.9] tracking-[0.02em] glow-text-blue"
+      <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: PREMIUM_EASE }}
+          className="font-display font-bold leading-[0.95] tracking-[0.02em]"
           style={{
-            fontSize: "clamp(56px, 13vw, 140px)",
-            willChange: "transform",
+            color: "var(--text-primary)",
+            fontSize: "clamp(48px, 10vw, 96px)",
           }}
         >
-          <span className="shimmer-title">
-            {titleLetters.map((ch, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  delay: 0.4 + i * 0.05,
-                  duration: 0.5,
-                  ease: "easeOut",
-                }}
-                style={{ display: "inline-block" }}
-              >
-                {ch}
-              </motion.span>
-            ))}
-          </span>
-        </h1>
+          {SITE_CONTENT.game.title}
+        </motion.h1>
 
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
+        <motion.div
+          initial={{ opacity: 0, scaleX: 0 }}
+          animate={{ opacity: 1, scaleX: 1 }}
+          transition={{ delay: 1.0, duration: 0.9, ease: PREMIUM_EASE }}
+          className="mt-7 h-px w-20"
+          style={{ background: "rgba(255,255,255,0.2)", transformOrigin: "center" }}
+        />
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 + titleLetters.length * 0.05, duration: 0.6 }}
-          className="font-display mt-1 font-bold tracking-[0.4em] glow-text-gold"
+          transition={{ delay: 1.3, duration: 1.1, ease: PREMIUM_EASE }}
+          className="font-display mt-7 text-[18px] uppercase"
           style={{
-            color: "var(--nova-gold)",
-            fontSize: "clamp(20px, 4vw, 44px)",
+            color: "var(--text-secondary)",
+            fontWeight: 500,
+            letterSpacing: "0.4em",
           }}
         >
           {SITE_CONTENT.game.subtitle}
-        </motion.h2>
+        </motion.div>
 
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.9 + titleLetters.length * 0.05, duration: 0.6 }}
-          className="font-mono-ui mt-8 text-[11px] uppercase tracking-[0.3em] sm:text-[13px]"
-          style={{ color: "var(--text-secondary)" }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 1.1, ease: PREMIUM_EASE }}
+          className="font-body mt-8 max-w-[420px] text-[15px]"
+          style={{
+            color: "var(--text-muted)",
+            fontWeight: 300,
+            lineHeight: 1.8,
+          }}
         >
           {SITE_CONTENT.game.tagline}
         </motion.p>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1 + titleLetters.length * 0.05, duration: 0.6 }}
-          className="font-body mt-4 max-w-[520px] text-[15px] leading-relaxed sm:text-[16px]"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          {SITE_CONTENT.game.description}
-        </motion.p>
-
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.3 + titleLetters.length * 0.05, duration: 0.5 }}
-          className="mt-6 flex items-center gap-3"
-        >
-          <span
-            className="glass font-mono-ui rounded-sm px-3 py-1 text-[10px] tracking-[0.2em]"
-            style={{ color: "var(--nova-gold)", borderColor: "rgba(255,213,79,0.3)" }}
-          >
-            {SITE_CONTENT.game.rating}
-          </span>
-          <span
-            className="font-mono-ui text-[10px] tracking-[0.2em]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            {SITE_CONTENT.game.genre}
-          </span>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5 + titleLetters.length * 0.05, duration: 0.6 }}
-          className="mt-10 flex flex-col gap-4 sm:flex-row"
+          transition={{ delay: 1.7, duration: 1.1, ease: PREMIUM_EASE }}
+          className="mt-10"
         >
-          <button
-            className="conic-border font-display rounded-md px-9 py-4 text-[15px] font-bold uppercase tracking-[0.25em] transition-transform hover:scale-[1.03] active:scale-[0.98]"
+          <a
+            href="/story"
+            className="font-display inline-flex h-11 items-center justify-center px-8 uppercase"
             style={{
-              background:
-                "linear-gradient(135deg, var(--stellar-deep), var(--plasma-blue))",
-              color: "#fff",
-              boxShadow: "0 10px 40px rgba(124,77,255,0.5)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              color: "var(--text-primary)",
+              fontWeight: 500,
+              fontSize: 13,
+              letterSpacing: "0.2em",
+              background: "transparent",
+              transition: "background 400ms ease, border-color 400ms ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
             }}
           >
             {SITE_CONTENT.hero.primaryCta}
-          </button>
-          <button
-            className="glass font-display rounded-md px-9 py-4 text-[15px] font-bold uppercase tracking-[0.25em] transition-transform hover:scale-[1.03] active:scale-[0.98]"
-            style={{
-              color: "var(--nova-gold)",
-              borderColor: "rgba(255,213,79,0.4)",
-              boxShadow: "0 0 30px rgba(255,213,79,0.15)",
-            }}
-          >
-            {SITE_CONTENT.hero.secondaryCta}
-          </button>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.8 + titleLetters.length * 0.05, duration: 0.6 }}
-          className="font-mono-ui mt-8 text-[10px] uppercase tracking-[0.25em]"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {SITE_CONTENT.hero.availabilityLine}
+          </a>
         </motion.div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.4, duration: 0.6 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-      >
-        <span
-          className="font-mono-ui text-[9px] uppercase tracking-[0.3em]"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {SITE_CONTENT.hero.scrollLabel}
-        </span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ChevronDown size={20} style={{ color: "var(--plasma-cyan)" }} />
-        </motion.div>
-      </motion.div>
+      {/* Scroll indicator — just a line */}
+      <div
+        className="pointer-events-none absolute bottom-10 left-1/2 h-10 w-px -translate-x-1/2"
+        style={{
+          background: "rgba(255,255,255,0.6)",
+          animation: "scroll-pulse 2.5s ease-in-out infinite",
+        }}
+      />
     </section>
   );
 }
