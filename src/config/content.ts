@@ -1,14 +1,7 @@
 /**
  * CONTENT SWAP PROTOCOL
  * ─────────────────────
- * To replace ALL content on this site with a new game/product:
- * 1. Send ONE prompt to Lovable: "Replace the SITE_CONTENT object in
- *    src/config/content.ts with the following: [paste new object]"
- * 2. Do NOT touch any component files. Only content.ts changes.
- * 3. The UI system, animations, glassmorphism, layout, and design
- *    foundation are permanent and will auto-apply to new content.
- * 4. If new sections are needed, add them to SITE_CONTENT first,
- *    then prompt: "Add a new section using SITE_CONTENT.newSection"
+ * Single source of truth for all copy. Update values, not components.
  */
 
 export const SITE_CONTENT = {
@@ -22,29 +15,39 @@ export const SITE_CONTENT = {
   game: {
     title: "VOIDBORN",
     subtitle: "SHATTERED EPOCH",
-    tagline: "THE UNIVERSE IS DYING. YOU ARE ITS LAST WEAPON.",
+    tagline: "The universe is dying. You are its last weapon.",
     description:
       "Wield the energy of collapsing stars. Fight across fractured timelines. Stop the heat death of existence.",
     genre: "ACTION RPG · OPEN WORLD · CO-OP",
     rating: "PEGI 18",
-    releaseYear: "2026",
-    platforms: ["PC", "PS6", "Xbox Series X", "Cloud"],
     accentColorPrimary: "#4fc3f7",
     accentColorSecondary: "#ffd54f",
     accentColorTertiary: "#ce93d8",
   },
 
   nav: {
-    links: ["Story", "Universe", "Classes", "Media", "Pre-Order"],
-    cta: "PRE-ORDER NOW",
+    links: [
+      { label: "Story", href: "/story" },
+      { label: "Universe", href: "/universe" },
+      { label: "Media", href: "/media" },
+    ],
+    cta: { label: "EXPLORE", href: "/story" },
   },
 
   hero: {
-    preTitle: "ANTHROPIC GAMES PRESENTS",
-    primaryCta: "ENTER THE VOID",
-    secondaryCta: "WATCH TRAILER ▶",
-    scrollLabel: "SCROLL TO EXPLORE",
-    availabilityLine: "AVAILABLE 2026 · PC · PS6 · XBOX SERIES X",
+    primaryCta: "EXPLORE THE WORLD",
+    scrollLabel: "SCROLL",
+  },
+
+  home: {
+    teaserWords: ["WIELD.", "FRACTURE.", "SURVIVE."],
+    teaserLink: "Discover the world",
+  },
+
+  pages: {
+    story: "THE STORY",
+    universe: "THE UNIVERSE",
+    media: "MEDIA",
   },
 
   story: {
@@ -234,84 +237,9 @@ export const SITE_CONTENT = {
     },
   },
 
-  editions: {
-    sectionLabel: "SECURE YOUR VOID CORE",
-    sectionSubtitle: "Launch Day 2026 — Pre-order Bonuses Expire Soon",
-    items: [
-      {
-        id: "standard",
-        name: "STANDARD EDITION",
-        price: "$59.99",
-        accentColor: "#4fc3f7",
-        featured: false,
-        ribbon: null as string | null,
-        features: [
-          "Full Base Game",
-          "Day-1 Void Core Armor Set",
-          "Digital Soundtrack",
-        ],
-        cta: "PRE-ORDER NOW",
-      },
-      {
-        id: "legend",
-        name: "VOID LEGEND EDITION",
-        price: "$89.99",
-        accentColor: "#ffd54f",
-        featured: true,
-        ribbon: "BEST VALUE" as string | null,
-        features: [
-          "Everything in Standard",
-          "Chronoslip Class — 2 Weeks Early Access",
-          "3 Exclusive Epoch Weapons",
-          "Avatar Frame: Void Sovereign",
-          "Season Pass Year 1",
-          "Digital Art Book (280 pages)",
-          "Composer's Commentary",
-        ],
-        cta: "PRE-ORDER NOW",
-      },
-      {
-        id: "ultimate",
-        name: "VOIDBORN ULTIMATE",
-        price: "$129.99",
-        accentColor: "#ce93d8",
-        featured: false,
-        ribbon: null as string | null,
-        features: [
-          "Everything in Void Legend",
-          "Physical Collector's Box",
-          "Void Core Resin Replica",
-          "Printed Timeline Map",
-          'Starbreaker Figurine (12")',
-          "Founder's Badge (permanent in-game)",
-          "Lifetime Season Pass",
-          "Name in Game Credits",
-        ],
-        cta: "PRE-ORDER NOW",
-      },
-    ],
-    platformBadges: ["PC", "PlayStation 6", "Xbox Series X", "Cloud"],
-    finePrint:
-      "Pre-order bonuses delivered at launch. Physical editions ship within 2 weeks of release date.",
-  },
-
-  community: {
-    sectionTitle: "JOIN THE VOIDBORN ORDER",
-    sectionSubtitle:
-      "Be first to receive lore drops, class reveals, and exclusive beta access keys.",
-    inputPlaceholder: "your.email@domain.com",
-    ctaLabel: "ENTER THE VOID",
-    successMessage: "✓ YOU ARE VOIDBORN. CHECK YOUR INBOX.",
-    enlistedCount: 147293,
-    enlistedLabel: "VOIDBORN HAVE ENLISTED",
-    socialLinks: ["twitter", "discord", "youtube", "tiktok", "reddit"],
-  },
-
   footer: {
-    tagline: "The last epic. The final war. The void calls.",
-    legalLinks: ["Privacy Policy", "Terms of Service", "Cookie Policy"],
-    platformLinks: ["PC System Requirements", "Console Specs", "Accessibility"],
     madeBy: "Made by Anuga Weerasinghe",
+    disclaimer: "A game concept by Anthropic Games · Not a commercial release",
   },
 };
 

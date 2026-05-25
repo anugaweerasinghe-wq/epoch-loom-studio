@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { SITE_CONTENT } from "@/config/content";
 import { useCountUp } from "@/hooks/useCountUp";
+import { premiumReveal, PREMIUM_EASE } from "@/lib/motion";
 
 function StatCard({
   value,
@@ -17,36 +18,28 @@ function StatCard({
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.7, delay, ease: "easeOut" }}
-      className="glass rounded-2xl p-8 text-center"
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.9, delay, ease: PREMIUM_EASE }}
+      className="glass rounded-2xl p-10 text-center"
     >
       <div
-        className="font-display text-[64px] font-bold leading-none sm:text-[80px] glow-text-blue"
-        style={{ color: "var(--plasma-blue)" }}
+        className="font-display font-bold leading-none"
+        style={{
+          color: "var(--text-primary)",
+          fontSize: "clamp(48px, 6vw, 72px)",
+        }}
       >
-        {value == null ? (
-          <motion.span
-            initial={{ scale: 0.5, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true, amount: 0.5 }}
-            transition={{ duration: 0.6, delay: delay + 0.2, type: "spring" }}
-            style={{ display: "inline-block" }}
-          >
-            {suffix}
-          </motion.span>
-        ) : (
-          <>
-            {count.toLocaleString()}
-            {suffix}
-          </>
-        )}
+        {value == null ? suffix : `${count.toLocaleString()}${suffix}`}
       </div>
       <div
-        className="font-mono-ui mt-3 text-[10px] uppercase tracking-[0.3em]"
-        style={{ color: "var(--text-secondary)" }}
+        className="font-mono-ui mt-4 text-[10px] uppercase"
+        style={{
+          color: "var(--text-secondary)",
+          opacity: 0.6,
+          letterSpacing: "0.2em",
+        }}
       >
         {label}
       </div>
@@ -57,29 +50,16 @@ function StatCard({
 export function Stats() {
   return (
     <section
-      className="relative overflow-hidden px-6 py-[120px]"
+      className="relative overflow-hidden px-6 py-[140px]"
       style={{ background: "var(--void-deep)" }}
     >
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80vw 50vw at 50% 50%, rgba(124,77,255,0.18), transparent 70%)",
-        }}
-      />
       <div className="relative mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6 }}
-          className="mb-14 text-center"
-        >
+        <motion.div {...premiumReveal} className="mb-16 text-center">
           <div
-            className="font-mono-ui text-[10px] uppercase tracking-[0.35em]"
-            style={{ color: "var(--plasma-cyan)" }}
+            className="font-mono-ui text-[10px] uppercase"
+            style={{ color: "var(--text-secondary)", opacity: 0.6, letterSpacing: "0.2em" }}
           >
-            ◆ {SITE_CONTENT.stats.sectionLabel} ◆
+            {SITE_CONTENT.stats.sectionLabel}
           </div>
         </motion.div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

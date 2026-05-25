@@ -4,10 +4,14 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "framer-motion";
 
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/sections/Footer";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -72,18 +76,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "voidborn.lovable.app" },
-      { name: "description", content: "Voidborne: Shattered Epoch is a cinematic marketing website for an action RPG." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "voidborn.lovable.app" },
-      { property: "og:description", content: "Voidborne: Shattered Epoch is a cinematic marketing website for an action RPG." },
+      { title: "VOIDBORN — A game concept by Anthropic Games" },
+      {
+        name: "description",
+        content:
+          "VOIDBORN: SHATTERED EPOCH — wield the energy of collapsing stars across 144 fractured timelines.",
+      },
+      { property: "og:title", content: "VOIDBORN — SHATTERED EPOCH" },
+      {
+        property: "og:description",
+        content: "The universe is dying. You are its last weapon.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "voidborn.lovable.app" },
-      { name: "twitter:description", content: "Voidborne: Shattered Epoch is a cinematic marketing website for an action RPG." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/004fc9a2-5bf0-4c85-88ef-0296959d5413/id-preview-f72ef522--9ddb5de7-f2e6-42f7-824f-f9df79aabba1.lovable.app-1779632451426.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/004fc9a2-5bf0-4c85-88ef-0296959d5413/id-preview-f72ef522--9ddb5de7-f2e6-42f7-824f-f9df79aabba1.lovable.app-1779632451426.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -92,10 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap",
       },
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
     ],
   }),
   shellComponent: RootShell,
@@ -118,12 +120,33 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AnimatedOutlet() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <Outlet />
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <Navbar />
+      <main className="relative">
+        <AnimatedOutlet />
+      </main>
+      <Footer />
     </QueryClientProvider>
   );
 }
