@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "@tanstack/react-router";
 import { SITE_CONTENT } from "@/config/content";
 import { WarriorSilhouette } from "@/components/svg/WarriorSilhouette";
 import { PREMIUM_EASE } from "@/lib/motion";
@@ -193,8 +194,8 @@ export function Hero() {
           transition={{ delay: 1.7, duration: 1.1, ease: PREMIUM_EASE }}
           className="mt-10"
         >
-          <a
-            href="/story"
+          <Link
+            to="/story"
             className="font-display inline-flex h-11 items-center justify-center px-8 uppercase"
             style={{
               border: "1px solid rgba(255,255,255,0.2)",
@@ -215,7 +216,7 @@ export function Hero() {
             }}
           >
             {SITE_CONTENT.hero.primaryCta}
-          </a>
+          </Link>
         </motion.div>
       </div>
 
