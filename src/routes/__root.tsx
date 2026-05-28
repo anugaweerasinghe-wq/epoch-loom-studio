@@ -126,16 +126,17 @@ function AnimatedOutlet() {
     <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        initial={{ opacity: 0, filter: "blur(12px)", scale: 0.99 }}
+        animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+        exit={{ opacity: 0, filter: "blur(8px)", scale: 1.01 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
         <Outlet />
       </motion.div>
     </AnimatePresence>
   );
 }
+
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();

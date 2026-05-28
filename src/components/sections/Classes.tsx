@@ -170,12 +170,49 @@ export function Classes() {
                 </p>
               </div>
 
+              {/* Ability cards grid */}
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {active.abilities.map((ab, idx) => (
+                  <motion.div
+                    key={ab.name}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 + idx * 0.1, ease: PREMIUM_EASE }}
+                    className="glass relative overflow-hidden rounded-xl p-4"
+                  >
+                    <div
+                      className="absolute inset-x-0 top-0 h-px"
+                      style={{ background: active.colorAccent, opacity: 0.7 }}
+                    />
+                    <div
+                      className="font-display text-[14px] font-semibold tracking-wide"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {ab.name}
+                    </div>
+                    <div
+                      className="font-mono-ui mt-1 text-[9px] uppercase"
+                      style={{ color: "var(--text-muted)", letterSpacing: "0.2em" }}
+                    >
+                      {ab.type}
+                    </div>
+                    <p
+                      className="font-body mt-3 text-[13px]"
+                      style={{ color: "var(--text-secondary)", fontWeight: 300, lineHeight: 1.7 }}
+                    >
+                      {ab.body}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+
               <div
                 className="font-mono-ui mt-6 text-[10px] uppercase tracking-[0.2em]"
                 style={{ color: "var(--text-muted)" }}
               >
                 {active.unlockStatus}
               </div>
+
             </div>
           </motion.div>
         </AnimatePresence>
