@@ -1,32 +1,50 @@
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
 import { SITE_CONTENT } from "@/config/content";
-import { premiumReveal, staggerParent, staggerChild } from "@/lib/motion";
+import { SCENE_MAP } from "@/components/media/sceneMap";
+import { SceneHUD, SceneCaption } from "@/components/media/scenes/SceneShell";
+import { cardReveal, textReveal } from "@/lib/motion";
 
 export function Media() {
-  const shots = SITE_CONTENT.media.screenshots;
+  const scenes = SITE_CONTENT.media.scenes;
+  const featured = scenes[0];
+  const grid = scenes.slice(1);
+  const FeaturedScene = SCENE_MAP[featured.id];
+  const TrailerScene = SCENE_MAP[featured.id];
+
   return (
-    <section className="relative px-6 py-[60px]" style={{ background: "var(--void-black)" }}>
+    <section
+      className="relative px-6 py-[100px]"
+      style={{ background: "var(--void-black)" }}
+    >
       <div className="mx-auto max-w-7xl">
+        {/* Featured scene */}
         <motion.div
-          {...staggerParent}
-          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          {...cardReveal}
+          className="group relative h-[520px] w-full overflow-hidden rounded-2xl"
+          style={{ border: "1px solid rgba(255,255,255,0.06)" }}
         >
-          {shots.map((s, i) => {
-            const sizes = [
-              "lg:row-span-2 lg:col-span-1 min-h-[400px]",
-              "min-h-[260px]",
-              "min-h-[260px]",
-              "min-h-[260px] lg:col-span-2",
-              "min-h-[260px]",
-            ];
+          <FeaturedScene />
+          <SceneHUD
+            sector={`EPOCH 144 / ${featured.sector}`}
+            label={featured.readout.label}
+            value={featured.readout.value}
+            danger={featured.readout.danger}
+          />
+          <SceneCaption name={featured.name} sector={`EPOCH 144 / ${featured.sector}`} />
+        </motion.div>
+
+        {/* 2×2 grid */}
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          {grid.map((s, i) => {
+            const Scene = SCENE_MAP[s.id];
+            const epoch = ["07", "23", "51", "99"][i] ?? "??";
             return (
               <motion.div
                 key={s.id}
-                variants={staggerChild}
-                className={`group relative overflow-hidden rounded-2xl ${sizes[i] ?? ""}`}
+                {...cardReveal}
+                transition={{ ...cardReveal.transition, delay: i * 0.08 }}
+                className="group relative h-[320px] overflow-hidden rounded-2xl"
                 style={{
-                  background: s.gradient,
                   border: "1px solid rgba(255,255,255,0.06)",
                   transition: "border-color 400ms ease, transform 400ms ease",
                 }}
@@ -39,59 +57,72 @@ export function Media() {
                   e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
                 }}
               >
-                <div className="absolute inset-x-0 bottom-0 translate-y-full bg-black/60 p-5 backdrop-blur-md transition-transform duration-500 group-hover:translate-y-0">
-                  <div
-                    className="font-mono-ui text-[11px] uppercase"
-                    style={{
-                      color: "var(--text-secondary)",
-                      letterSpacing: "0.2em",
-                    }}
-                  >
-                    {s.name}
-                  </div>
-                </div>
+                <Scene />
+                <SceneHUD
+                  sector={`EPOCH ${epoch} / ${s.sector}`}
+                  label={s.readout.label}
+                  value={s.readout.value}
+                  danger={s.readout.danger}
+                />
+                <SceneCaption name={s.name} sector={`EPOCH ${epoch} / ${s.sector}`} />
               </motion.div>
             );
           })}
+        </div>
+
+        {/* Disclaimer */}
+        <motion.div
+          {...textReveal}
+          className="font-mono-ui mt-10 text-center text-[10px] uppercase"
+          style={{ color: "var(--text-muted)", letterSpacing: "0.25em" }}
+        >
+          {SITE_CONTENT.media.disclaimer}
         </motion.div>
 
+        {/* Trailer card */}
         <motion.div
-          {...premiumReveal}
-          className="relative mt-8 aspect-video w-full overflow-hidden rounded-2xl"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 50%, #0d0a1a 0%, #050508 100%)",
-            border: "1px solid rgba(255,255,255,0.06)",
-            transition: "border-color 400ms ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
-          }}
+          {...cardReveal}
+          className="relative mt-16 aspect-video w-full overflow-hidden rounded-2xl"
+          style={{ border: "1px solid rgba(255,255,255,0.06)" }}
         >
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
+          <div className="absolute inset-0">
+            <TrailerScene />
+          </div>
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md"
+            style={{ background: "rgba(5,5,8,0.55)" }}
+          >
             <div
-              className="flex h-20 w-20 items-center justify-center rounded-full transition-transform duration-400 hover:scale-105"
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.2)",
-              }}
+              className="font-mono-ui text-[10px] uppercase"
+              style={{ color: "var(--text-muted)", letterSpacing: "0.3em" }}
             >
-              <Play size={28} style={{ color: "var(--text-primary)" }} fill="currentColor" />
+              IN PRODUCTION
             </div>
             <div
-              className="font-mono-ui text-[11px] uppercase"
-              style={{ color: "var(--text-primary)", letterSpacing: "0.2em" }}
+              className="font-display mt-4 text-center text-[32px] font-bold tracking-wide sm:text-[40px]"
+              style={{ color: "var(--text-primary)" }}
             >
               {SITE_CONTENT.media.trailer.label}
             </div>
             <div
-              className="font-mono-ui text-[10px]"
+              className="font-mono-ui mt-3 text-[12px] uppercase"
               style={{ color: "var(--text-muted)", letterSpacing: "0.2em" }}
             >
-              {SITE_CONTENT.media.trailer.duration}
+              {SITE_CONTENT.media.trailer.sub}
+            </div>
+            <div
+              className="mt-8 h-px w-[280px] overflow-hidden"
+              style={{ background: "rgba(255,255,255,0.08)" }}
+            >
+              <div
+                className="h-full"
+                style={{
+                  width: "30%",
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(0,229,255,0.6), transparent)",
+                  animation: "trailer-progress 8s ease-in-out infinite",
+                }}
+              />
             </div>
           </div>
         </motion.div>

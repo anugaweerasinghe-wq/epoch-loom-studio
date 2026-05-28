@@ -48,9 +48,7 @@ body {
 }
 
 @layer base {
-  * {
-    border-color: var(--void-glass-border);
-  }
+  * { border-color: var(--void-glass-border); }
 }
 
 .font-display { font-family: "Rajdhani", system-ui, sans-serif; }
@@ -64,9 +62,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: border-color 400ms ease, transform 400ms ease, background 400ms ease;
 }
-.glass:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-}
+.glass:hover { border-color: rgba(255, 255, 255, 0.15); }
 .glass-strong {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(40px) saturate(200%);
@@ -74,31 +70,79 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Star twinkle (subtle) */
-@keyframes twinkle {
-  0%, 100% { opacity: var(--star-op, 0.4); }
-  50% { opacity: 0.15; }
+.section-divider {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0;
 }
 
-/* Warrior idle float */
-@keyframes float-y {
-  0%, 100% { transform: translateY(-5px); }
-  50% { transform: translateY(5px); }
-}
+/* Hero / global loops */
+@keyframes twinkle { 0%, 100% { opacity: var(--star-op, 0.4); } 50% { opacity: 0.15; } }
+@keyframes float-y { 0%, 100% { transform: translateY(-5px); } 50% { transform: translateY(5px); } }
+@keyframes ambient-drift { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(2%, -1%, 0); } }
+@keyframes ring-spin { to { transform: rotate(360deg); } }
+@keyframes scroll-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
 
-/* Slow ambient gradient drift — the only allowed background loop */
-@keyframes ambient-drift {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(2%, -1%, 0); }
+/* Scene animations — GPU composited */
+@keyframes bio-pulse {
+  0%, 100% { opacity: 0.3; transform: translateZ(0) scale(0.9); }
+  50% { opacity: 1; transform: translateZ(0) scale(1.1); }
 }
-
-/* Slow ring rotation */
-@keyframes ring-spin {
-  to { transform: rotate(360deg); }
+@keyframes particle-drift {
+  0% { transform: translateY(0) translateZ(0); opacity: 0; }
+  20% { opacity: 0.7; }
+  100% { transform: translateY(-30px) translateZ(0); opacity: 0; }
 }
-
-/* Scroll indicator pulse */
-@keyframes scroll-pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.7; }
+@keyframes neon-flicker {
+  0%, 100% { opacity: 0.85; }
+  41%, 43% { opacity: 0.3; }
+  45% { opacity: 0.9; }
+  72%, 74% { opacity: 0.4; }
+  76% { opacity: 1; }
+}
+@keyframes rain-fall {
+  0% { transform: translateY(-20px) translateZ(0); opacity: 0; }
+  10% { opacity: 0.4; }
+  100% { transform: translateY(320px) translateZ(0); opacity: 0; }
+}
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1) translateZ(0); }
+  50% { transform: scale(1.04) translateZ(0); }
+}
+@keyframes debris-drift {
+  0%, 100% { transform: translate(0, 0) rotate(var(--r, 0deg)) translateZ(0); }
+  50% { transform: translate(2px, -6px) rotate(calc(var(--r, 0deg) + 8deg)) translateZ(0); }
+}
+@keyframes star-glitch {
+  0%, 100% { opacity: 0.5; transform: translate(0, 0); }
+  50% { opacity: 1; transform: translate(1px, -1px); }
+}
+@keyframes rift-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) scale(1.05) rotate(2deg); }
+}
+@keyframes dash-flow { to { stroke-dashoffset: -100; } }
+@keyframes shard-spin { to { transform: rotate(360deg); } }
+@keyframes star-collapse {
+  0%, 100% { transform: scale(1) translateZ(0); }
+  25% { transform: scale(0.85) translateZ(0); }
+  50% { transform: scale(1.15) translateZ(0); }
+  75% { transform: scale(0.9) translateZ(0); }
+}
+@keyframes shockwave {
+  0% { transform: scale(1) translateZ(0); opacity: 0.5; }
+  100% { transform: scale(4) translateZ(0); opacity: 0; }
+}
+@keyframes singularity-pull {
+  0% { opacity: 0.8; transform: scale(1) translateZ(0); }
+  100% { opacity: 0; transform: scale(0) translate(-20px, 10px) translateZ(0); }
+}
+@keyframes scene-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+@keyframes trailer-progress {
+  0% { transform: translateX(-100%) translateZ(0); }
+  100% { transform: translateX(400%) translateZ(0); }
 }

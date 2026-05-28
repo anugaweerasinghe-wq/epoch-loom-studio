@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { SITE_CONTENT } from "@/config/content";
 import { WarriorSilhouette } from "@/components/svg/WarriorSilhouette";
-import { PREMIUM_EASE } from "@/lib/motion";
+import { EXPO_OUT } from "@/lib/motion";
 
 function generateStars(count: number, seed = 1) {
   let s = seed;
@@ -57,15 +57,32 @@ export function Hero() {
 
   const starCount = isMobile ? 200 : 800;
 
+  // Parallax — multi-layer depth
+  const { scrollY } = useScroll();
+  const starFieldY = useTransform(scrollY, [0, 800], [0, -120]);
+  const orbsY = useTransform(scrollY, [0, 800], [0, -200]);
+  const warriorY = useTransform(scrollY, [0, 800], [0, -80]);
+  const titleY = useTransform(scrollY, [0, 800], [0, -60]);
+  const subtitleY = useTransform(scrollY, [0, 800], [0, -40]);
+  const heroOpacity = useTransform(scrollY, [0, 600], [1, 0]);
+
+  const smoothWarriorY = useSpring(warriorY, { stiffness: 80, damping: 20 });
+  const smoothTitleY = useSpring(titleY, { stiffness: 100, damping: 25 });
+  const smoothSubtitleY = useSpring(subtitleY, { stiffness: 100, damping: 25 });
+  const smoothStarY = useSpring(starFieldY, { stiffness: 60, damping: 20 });
+  const smoothOrbsY = useSpring(orbsY, { stiffness: 60, damping: 20 });
+
   return (
-    <section
+    <motion.section
       className="relative flex min-h-screen w-full items-center justify-center overflow-hidden"
-      style={{ background: "var(--void-black)" }}
+      style={{ background: "var(--void-black)", opacity: heroOpacity }}
     >
       {/* Star field */}
-      <StarField count={starCount} />
+      <motion.div className="absolute inset-0" style={{ y: smoothStarY }}>
+        <StarField count={starCount} />
+      </motion.div>
 
-      {/* Soft central glow — barely there */}
+      {/* Soft central glow */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -77,7 +94,7 @@ export function Hero() {
 
       {/* Whisper orbs */}
       {!isMobile && (
-        <>
+        <motion.div className="absolute inset-0" style={{ y: smoothOrbsY }}>
           {[
             { l: "12%", t: "22%", s: 220, c: "#7c4dff" },
             { l: "82%", t: "30%", s: 180, c: "#4fc3f7" },
@@ -97,16 +114,15 @@ export function Hero() {
               }}
             />
           ))}
-        </>
+        </motion.div>
       )}
 
-      {/* Warrior silhouette */}
+      {/* Warrior */}
       {!isMobile && (
-        <div
+        <motion.div
           className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          style={{ height: 280 }}
+          style={{ height: 280, y: smoothWarriorY }}
         >
-          {/* Slow orbiting ring */}
           <div
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
@@ -126,7 +142,7 @@ export function Hero() {
           >
             <WarriorSilhouette />
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Bottom fade */}
@@ -140,14 +156,15 @@ export function Hero() {
       {/* Text layer */}
       <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 text-center">
         <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.1, ease: PREMIUM_EASE }}
-          className="font-display font-bold leading-[0.95] tracking-[0.02em]"
+          initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.2, ease: EXPO_OUT }}
           style={{
             color: "var(--text-primary)",
             fontSize: "clamp(48px, 10vw, 96px)",
+            y: smoothTitleY,
           }}
+          className="font-display font-bold leading-[0.95] tracking-[0.02em]"
         >
           {SITE_CONTENT.game.title}
         </motion.h1>
@@ -155,29 +172,30 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0, scaleX: 0 }}
           animate={{ opacity: 1, scaleX: 1 }}
-          transition={{ delay: 1.0, duration: 0.9, ease: PREMIUM_EASE }}
+          transition={{ delay: 1.0, duration: 1.2, ease: EXPO_OUT }}
           className="mt-7 h-px w-20"
           style={{ background: "rgba(255,255,255,0.2)", transformOrigin: "center" }}
         />
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.3, duration: 1.1, ease: PREMIUM_EASE }}
+          initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ delay: 1.3, duration: 1.1, ease: EXPO_OUT }}
           className="font-display mt-7 text-[18px] uppercase"
           style={{
             color: "var(--text-secondary)",
             fontWeight: 500,
             letterSpacing: "0.4em",
+            y: smoothSubtitleY,
           }}
         >
           {SITE_CONTENT.game.subtitle}
         </motion.div>
 
         <motion.p
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 1.1, ease: PREMIUM_EASE }}
+          initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ delay: 1.5, duration: 1.1, ease: EXPO_OUT }}
           className="font-body mt-8 max-w-[420px] text-[15px]"
           style={{
             color: "var(--text-muted)",
@@ -189,9 +207,9 @@ export function Hero() {
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.7, duration: 1.1, ease: PREMIUM_EASE }}
+          initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ delay: 1.7, duration: 1.1, ease: EXPO_OUT }}
           className="mt-10"
         >
           <Link
@@ -220,7 +238,7 @@ export function Hero() {
         </motion.div>
       </div>
 
-      {/* Scroll indicator — just a line */}
+      {/* Scroll indicator */}
       <div
         className="pointer-events-none absolute bottom-10 left-1/2 h-10 w-px -translate-x-1/2"
         style={{
@@ -228,6 +246,6 @@ export function Hero() {
           animation: "scroll-pulse 2.5s ease-in-out infinite",
         }}
       />
-    </section>
+    </motion.section>
   );
 }
