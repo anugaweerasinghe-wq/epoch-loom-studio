@@ -1,34 +1,37 @@
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SITE_CONTENT } from "@/config/content";
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 80);
-    on();
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
-  }, []);
+  const { scrollY } = useScroll();
+  const navBg = useTransform(
+    scrollY,
+    [0, 100],
+    ["rgba(5,5,8,0)", "rgba(5,5,8,0.85)"],
+  );
+  const navBlur = useTransform(scrollY, [0, 100], [0, 24]);
+  const navBorder = useTransform(
+    scrollY,
+    [0, 100],
+    ["rgba(255,255,255,0)", "rgba(255,255,255,0.08)"],
+  );
+  const blurStr = useTransform(navBlur, (b) => `blur(${b}px) saturate(180%)`);
 
   return (
     <motion.nav
       initial={{ y: -40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       className="fixed inset-x-0 top-0 z-50"
       style={{
-        backdropFilter: scrolled ? "blur(28px) saturate(180%)" : "blur(12px)",
-        WebkitBackdropFilter: scrolled ? "blur(28px) saturate(180%)" : "blur(12px)",
-        background: scrolled ? "rgba(5,5,8,0.7)" : "rgba(255,255,255,0.02)",
-        borderBottom: scrolled
-          ? "1px solid rgba(255,255,255,0.08)"
-          : "1px solid transparent",
-        transition: "background 400ms, border-color 400ms",
+        backdropFilter: blurStr,
+        WebkitBackdropFilter: blurStr,
+        background: navBg,
+        borderBottom: "1px solid",
+        borderBottomColor: navBorder,
       }}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
@@ -47,15 +50,11 @@ export function Navbar() {
               to={l.href}
               className="font-mono-ui group relative text-[11px] uppercase tracking-[0.2em]"
               style={{ color: "var(--text-secondary)" }}
-              activeProps={{
-                style: { color: "var(--plasma-cyan)" },
-              }}
+              activeProps={{ style: { color: "var(--plasma-cyan)" } }}
             >
               {({ isActive }) => (
                 <>
-                  <span
-                    className="transition-colors duration-300 group-hover:text-[color:var(--plasma-cyan)]"
-                  >
+                  <span className="transition-colors duration-300 group-hover:text-[color:var(--plasma-cyan)]">
                     {l.label}
                   </span>
                   <span
@@ -107,7 +106,7 @@ export function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden lg:hidden"
             style={{ background: "rgba(5,5,8,0.92)" }}
           >
