@@ -9,11 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorldRouteImport } from './routes/world'
+import { Route as UpdatesRouteImport } from './routes/updates'
 import { Route as UniverseRouteImport } from './routes/universe'
 import { Route as StoryRouteImport } from './routes/story'
+import { Route as SoundtrackRouteImport } from './routes/soundtrack'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as LoreRouteImport } from './routes/lore'
+import { Route as GameplayRouteImport } from './routes/gameplay'
+import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CharactersRouteImport } from './routes/characters'
+import { Route as BackgroundRouteImport } from './routes/background'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WorldRoute = WorldRouteImport.update({
+  id: '/world',
+  path: '/world',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpdatesRoute = UpdatesRouteImport.update({
+  id: '/updates',
+  path: '/updates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UniverseRoute = UniverseRouteImport.update({
   id: '/universe',
   path: '/universe',
@@ -24,9 +43,44 @@ const StoryRoute = StoryRouteImport.update({
   path: '/story',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SoundtrackRoute = SoundtrackRouteImport.update({
+  id: '/soundtrack',
+  path: '/soundtrack',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediaRoute = MediaRouteImport.update({
   id: '/media',
   path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoreRoute = LoreRouteImport.update({
+  id: '/lore',
+  path: '/lore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameplayRoute = GameplayRouteImport.update({
+  id: '/gameplay',
+  path: '/gameplay',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CharactersRoute = CharactersRouteImport.update({
+  id: '/characters',
+  path: '/characters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackgroundRoute = BackgroundRouteImport.update({
+  id: '/background',
+  path: '/background',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,40 +91,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/background': typeof BackgroundRoute
+  '/characters': typeof CharactersRoute
+  '/chat': typeof ChatRoute
+  '/gameplay': typeof GameplayRoute
+  '/lore': typeof LoreRoute
   '/media': typeof MediaRoute
+  '/soundtrack': typeof SoundtrackRoute
   '/story': typeof StoryRoute
   '/universe': typeof UniverseRoute
+  '/updates': typeof UpdatesRoute
+  '/world': typeof WorldRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/background': typeof BackgroundRoute
+  '/characters': typeof CharactersRoute
+  '/chat': typeof ChatRoute
+  '/gameplay': typeof GameplayRoute
+  '/lore': typeof LoreRoute
   '/media': typeof MediaRoute
+  '/soundtrack': typeof SoundtrackRoute
   '/story': typeof StoryRoute
   '/universe': typeof UniverseRoute
+  '/updates': typeof UpdatesRoute
+  '/world': typeof WorldRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/background': typeof BackgroundRoute
+  '/characters': typeof CharactersRoute
+  '/chat': typeof ChatRoute
+  '/gameplay': typeof GameplayRoute
+  '/lore': typeof LoreRoute
   '/media': typeof MediaRoute
+  '/soundtrack': typeof SoundtrackRoute
   '/story': typeof StoryRoute
   '/universe': typeof UniverseRoute
+  '/updates': typeof UpdatesRoute
+  '/world': typeof WorldRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/media' | '/story' | '/universe'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/background'
+    | '/characters'
+    | '/chat'
+    | '/gameplay'
+    | '/lore'
+    | '/media'
+    | '/soundtrack'
+    | '/story'
+    | '/universe'
+    | '/updates'
+    | '/world'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/media' | '/story' | '/universe'
-  id: '__root__' | '/' | '/media' | '/story' | '/universe'
+  to:
+    | '/'
+    | '/about'
+    | '/background'
+    | '/characters'
+    | '/chat'
+    | '/gameplay'
+    | '/lore'
+    | '/media'
+    | '/soundtrack'
+    | '/story'
+    | '/universe'
+    | '/updates'
+    | '/world'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/background'
+    | '/characters'
+    | '/chat'
+    | '/gameplay'
+    | '/lore'
+    | '/media'
+    | '/soundtrack'
+    | '/story'
+    | '/universe'
+    | '/updates'
+    | '/world'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  BackgroundRoute: typeof BackgroundRoute
+  CharactersRoute: typeof CharactersRoute
+  ChatRoute: typeof ChatRoute
+  GameplayRoute: typeof GameplayRoute
+  LoreRoute: typeof LoreRoute
   MediaRoute: typeof MediaRoute
+  SoundtrackRoute: typeof SoundtrackRoute
   StoryRoute: typeof StoryRoute
   UniverseRoute: typeof UniverseRoute
+  UpdatesRoute: typeof UpdatesRoute
+  WorldRoute: typeof WorldRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/world': {
+      id: '/world'
+      path: '/world'
+      fullPath: '/world'
+      preLoaderRoute: typeof WorldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/updates': {
+      id: '/updates'
+      path: '/updates'
+      fullPath: '/updates'
+      preLoaderRoute: typeof UpdatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/universe': {
       id: '/universe'
       path: '/universe'
@@ -85,11 +229,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/soundtrack': {
+      id: '/soundtrack'
+      path: '/soundtrack'
+      fullPath: '/soundtrack'
+      preLoaderRoute: typeof SoundtrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/media': {
       id: '/media'
       path: '/media'
       fullPath: '/media'
       preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lore': {
+      id: '/lore'
+      path: '/lore'
+      fullPath: '/lore'
+      preLoaderRoute: typeof LoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gameplay': {
+      id: '/gameplay'
+      path: '/gameplay'
+      fullPath: '/gameplay'
+      preLoaderRoute: typeof GameplayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/characters': {
+      id: '/characters'
+      path: '/characters'
+      fullPath: '/characters'
+      preLoaderRoute: typeof CharactersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/background': {
+      id: '/background'
+      path: '/background'
+      fullPath: '/background'
+      preLoaderRoute: typeof BackgroundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -104,10 +297,29 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  BackgroundRoute: BackgroundRoute,
+  CharactersRoute: CharactersRoute,
+  ChatRoute: ChatRoute,
+  GameplayRoute: GameplayRoute,
+  LoreRoute: LoreRoute,
   MediaRoute: MediaRoute,
+  SoundtrackRoute: SoundtrackRoute,
   StoryRoute: StoryRoute,
   UniverseRoute: UniverseRoute,
+  UpdatesRoute: UpdatesRoute,
+  WorldRoute: WorldRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
