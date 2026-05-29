@@ -59,7 +59,7 @@ function Index() {
           className="mt-20"
         >
           <Link
-            to="/story"
+            to="/lore"
             className="font-body inline-flex items-center gap-2 text-[13px]"
             style={{ color: "var(--text-muted)", fontWeight: 300 }}
           >

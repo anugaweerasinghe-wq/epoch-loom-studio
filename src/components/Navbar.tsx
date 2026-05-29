@@ -34,7 +34,7 @@ export function Navbar() {
         borderBottomColor: navBorder,
       }}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-6">
         <Link
           to="/"
           className="font-display text-[18px] font-bold tracking-[0.15em]"
@@ -43,14 +43,15 @@ export function Navbar() {
           {SITE_CONTENT.game.title}
         </Link>
 
-        <div className="hidden items-center gap-10 lg:flex">
+        <div className="hidden items-center gap-7 xl:flex">
           {SITE_CONTENT.nav.links.map((l) => (
             <Link
               key={l.href}
               to={l.href}
-              className="font-mono-ui group relative text-[11px] uppercase tracking-[0.2em]"
+              className="font-mono-ui group relative text-[10.5px] uppercase tracking-[0.2em]"
               style={{ color: "var(--text-secondary)" }}
               activeProps={{ style: { color: "var(--plasma-cyan)" } }}
+              activeOptions={{ exact: l.href === "/" }}
             >
               {({ isActive }) => (
                 <>
@@ -72,26 +73,38 @@ export function Navbar() {
 
         <Link
           to={SITE_CONTENT.nav.cta.href}
-          className="font-mono-ui hidden h-9 items-center px-5 text-[11px] uppercase tracking-[0.2em] lg:inline-flex"
+          className="font-mono-ui relative hidden h-9 items-center gap-2 px-5 text-[11px] uppercase tracking-[0.2em] xl:inline-flex"
           style={{
             border: "1px solid rgba(255,255,255,0.2)",
             color: "var(--text-primary)",
-            transition: "background 400ms, border-color 400ms",
+            transition: "background 400ms, border-color 400ms, box-shadow 400ms",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-            e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)";
+            e.currentTarget.style.background = "rgba(79,195,247,0.06)";
+            e.currentTarget.style.borderColor = "rgba(79,195,247,0.5)";
+            e.currentTarget.style.boxShadow = "0 0 24px -8px rgba(79,195,247,0.5)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "transparent";
             e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+            e.currentTarget.style.boxShadow = "none";
           }}
         >
           {SITE_CONTENT.nav.cta.label}
+          <span className="relative inline-flex h-1.5 w-1.5">
+            <span
+              className="absolute inset-0 animate-ping rounded-full"
+              style={{ background: "var(--plasma-cyan)", opacity: 0.7 }}
+            />
+            <span
+              className="relative inline-flex h-1.5 w-1.5 rounded-full"
+              style={{ background: "var(--plasma-cyan)" }}
+            />
+          </span>
         </Link>
 
         <button
-          className="lg:hidden"
+          className="xl:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label="menu"
           style={{ color: "var(--text-primary)" }}
@@ -107,8 +120,8 @@ export function Navbar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden lg:hidden"
-            style={{ background: "rgba(5,5,8,0.92)" }}
+            className="overflow-hidden xl:hidden"
+            style={{ background: "rgba(5,5,8,0.95)", backdropFilter: "blur(24px)" }}
           >
             <div className="flex flex-col gap-1 px-6 py-4">
               {SITE_CONTENT.nav.links.map((l) => (
@@ -119,10 +132,23 @@ export function Navbar() {
                   className="font-mono-ui py-2 text-[12px] uppercase tracking-[0.2em]"
                   style={{ color: "var(--text-secondary)" }}
                   activeProps={{ style: { color: "var(--plasma-cyan)" } }}
+                  activeOptions={{ exact: l.href === "/" }}
                 >
                   {l.label}
                 </Link>
               ))}
+              <Link
+                to={SITE_CONTENT.nav.cta.href}
+                onClick={() => setOpen(false)}
+                className="font-mono-ui mt-3 inline-flex items-center gap-2 py-2 text-[12px] uppercase tracking-[0.2em]"
+                style={{ color: "var(--plasma-cyan)" }}
+              >
+                {SITE_CONTENT.nav.cta.label}
+                <span
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ background: "var(--plasma-cyan)" }}
+                />
+              </Link>
             </div>
           </motion.div>
         )}

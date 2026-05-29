@@ -1,116 +1,77 @@
-# VOIDBORN — Premium Refinement Pass
+# VOIDBORN — Premium Overhaul (Phased)
 
-Transform the existing site from "loud game HUD" into a restrained, cinematic, multi-page concept showcase. Surgical edits only — sections not listed below are left untouched.
+Accent locked: **Plasma Cyan #4fc3f7**. Chatbot lives on `/chat` with a subtle nav entry + tiny pulse dot. Audio uses Pixabay CDN URLs with safe fallbacks. Delivered in three phases so each one can be QA'd before the next lands.
 
-## 1. Content config rewrite (`src/config/content.ts`)
+---
 
-- Delete `SITE_CONTENT.editions` and `SITE_CONTENT.community`.
-- Remove platform badges, release-year copy, "PRE-ORDER" / "AVAILABLE 2026" strings everywhere they appear.
-- Rewrite `nav.links` to objects: `{ label, href }` for `/story`, `/universe`, `/media`. New `nav.cta = { label: "EXPLORE", href: "/story" }`.
-- Update `hero`: drop `preTitle`, `secondaryCta`, `availabilityLine`; rename primary CTA to `EXPLORE THE WORLD`; add minimal home-teaser copy (`WIELD.`, `FRACTURE.`, `SURVIVE.`, and "Discover the world" line).
-- Add page-title strings: `THE UNIVERSE`, `MEDIA`, `THE STORY`.
-- Rewrite `footer` to: `tagline` removed, new fields `madeBy`, `disclaimer` ("A game concept by Anthropic Games · Not a commercial release"). Drop `legalLinks`, `platformLinks`.
+## Phase 1 — Architecture, Navigation, Content, About
 
-## 2. Motion system overhaul
-
-Create `src/lib/motion.ts` exporting one canonical preset:
-
-```ts
-export const premiumReveal = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.9, ease: [0.25, 0.1, 0.25, 1] },
-};
-export const staggerContainer = {
-  whileInView: "animate",
-  viewport: { once: true, amount: 0.2 },
-  transition: { staggerChildren: 0.12, delayChildren: 0.1 },
-};
-```
-
-Replace every existing entrance animation across all section components with this preset. Remove:
-- letter-by-letter title splits
-- shimmer / sweep keyframes on text
-- rotating conic gradient borders
-- infinite pulsing glows
-- any `x: ±60` slide-ins (only `y: 24 → 0` allowed)
-
-Allowed loops: warrior idle float (`±5px / 6s ease-in-out`) and one slow ambient background gradient drift.
-
-## 3. Multi-page routing
-
-New TanStack route files (each with own `head()` meta, no og:image at root):
+**Routing (TanStack file-based; project already uses TanStack, not React Router DOM — I'll keep the existing router and add files):**
 
 ```
 src/routes/
-  index.tsx       → Home  (Hero + minimal teaser)
-  story.tsx       → Story (existing Story section, expanded spacing)
-  universe.tsx    → Features + Classes
-  media.tsx       → Media masonry + trailer card
+  index.tsx          (Home — keep current hero + pillars, light polish)
+  background.tsx     (NEW — origin of the Voidborn, pre-collapse history)
+  gameplay.tsx       (NEW — core loops, Void Absorption, Nova Collapse)
+  lore.tsx           (rename/repoint from /story — keep timeline beats)
+  characters.tsx     (expand /universe Classes to all 12 Voidborn)
+  world.tsx          (NEW — locations: Abyssal Trench, Neo Citadel, Golden Temple, Void Breach, Singularity, +others)
+  updates.tsx        (NEW — simple changelog/news feed, 4–5 entries)
+  soundtrack.tsx     (NEW — track list + lore per track, ties to global player)
+  about.tsx          (NEW — 4-person team grid)
+  chat.tsx           (NEW — placeholder shell in Phase 1, wired in Phase 2)
+  media.tsx          (KEEP)
 ```
 
-Add `<Outlet />` already in `__root.tsx`. Wrap outlet content with `AnimatePresence mode="wait"` + per-page fade (0.4s). Navbar uses `<Link>` with `activeProps` → cyan + underline. Delete `Editions.tsx` and `Community.tsx`.
+- `/story` redirects to `/lore`, `/universe` redirects to `/characters` (zero broken links).
+- Sticky `Navbar.tsx` rebuilt: logo · Home · Background · Gameplay · Lore · Characters · World · Soundtrack · Updates · About · **Chat (• pulse dot)**. Collapses to hamburger sheet < lg. Existing reactive blur/opacity preserved.
+- All existing parallax, scroll-reveals, blur-in text, page-transition `AnimatePresence` — untouched.
 
-Home teaser block: full-width dark section, three words on three lines (Rajdhani 700, 48px, `--text-secondary`), each fading up on scroll; below them `↓ Discover the world` linking to `/story`.
+**Content expansion (cinematic placeholders, no Lorem):**
+- Extend `src/config/content.ts` with `background`, `gameplay`, `world`, `updates`, `soundtrack`, `about`, `characters12` keys.
+- 12 Voidborn classes fleshed out (Starbreaker, Chronoslip, Plasmaweave, Ashbinder, Hollowblade, Lightweaver, Gravewarden, Nullsong, Emberkin, Tidecaller, Voidwright, **The Thirteenth — [REDACTED]**).
+- 6–8 World locations with sector readouts in the same tone as existing Media scenes.
 
-## 4. Hero redesign (`src/components/sections/Hero.tsx`)
+**About page:** 4 glass cards (Sasindu, Yuthil, Risheli, Anuga) with role, one-line bio, monogram avatar (CSS), hover lift. Replaces every "made by" string. Footer becomes: `"Not a commercial release · About the team →"`.
 
-Strip:
-- perspective grid floor
-- diagonal light beam SVGs
-- pre-title bar
-- secondary CTA
-- genre / rating badges
-- counter-rotating conic rings on warrior
+**Visual polish (no regressions):**
+- Confirm single accent = `--plasma-cyan` (logo, active nav, pulse dot, one hover state per surface).
+- Button hover: scale 1.02 + subtle cyan ring glow (400ms, GPU-only).
+- Card tilt: mouse-parallax 3D tilt ≤ 6° on `lg+` only, via existing `useMouseParallax` hook, opt-in per card.
+- Tighten spacing to `py-32` rhythm, audit blur layers to ≤ 2 stacked.
 
-Star field → 800 dots max, color `#8892b0`, opacity 0.3–0.5. Ambient orbs → opacity × 0.4. Central radial purple glow → halve opacity, expand to ~100vw.
+## Phase 2 — AI Chatbot (`/chat`)
 
-Layout: vertically + horizontally centered single column.
-- `VOIDBORN` → Rajdhani 700, 96/48px, `--text-primary`, no glow utility.
-- 1px × 80px divider line `rgba(255,255,255,0.2)` (fades in after title).
-- `SHATTERED EPOCH` → Rajdhani 500, 18px, `--text-secondary`, tracking 0.4em.
-- Tagline → Inter 300, 15px, `--text-muted`, max-w 420px, line-height 1.8.
-- Single CTA `EXPLORE THE WORLD`: transparent bg, 1px `rgba(255,255,255,0.2)` border, Rajdhani 500 13px tracking 0.2em uppercase, 44px height, `px-8`; hover bg `rgba(255,255,255,0.06)` + border `rgba(255,255,255,0.4)`, 400ms.
-- Scroll indicator: 1px × 40px vertical line, opacity 0.3 → 0.7 → 0.3 over 2.5s, no text/chevron.
+- Full-page chat UI built with **AI Elements** (`conversation`, `message`, `prompt-input`, `shimmer`) — assistant messages no background, user bubble cyan-on-near-black, textarea auto-focused.
+- Server route: `src/routes/api/chat.ts` using `streamText` + Lovable AI Gateway, model `google/gemini-3-flash-preview`.
+- **Auto-learning context**: on each request, server reads `src/config/content.ts` (the single source of truth) and serializes the whole `SITE_CONTENT` object into the system prompt. When you edit lore tomorrow, the bot updates automatically — no reindex, no embeddings.
+- System prompt enforces:
+  - Persona: "charismatic in-universe Void guide".
+  - 1–3 sentences max, bullets/emojis sparingly.
+  - **Hard guardrail**: only answers about VOIDBORN: SHATTERED EPOCH; off-topic → polite refusal in-character.
+- localStorage transcript only (no DB, matches "free + built-in"). New-chat button clears it.
+- Subtle pulse-dot nav entry as picked.
 
-Warrior: max-height 280px; remove conic rings; keep one 60s-rotating SVG ring, 1px stroke, opacity 0.15; float `±5px / 6s`; static `drop-shadow(0 0 20px rgba(79,195,247,0.25))`.
+## Phase 3 — Global Soundtrack
 
-## 5. Global tone shift
+- `AudioProvider` (React context) mounted in `__root.tsx`, owns single `<audio>` element, survives page transitions.
+- Per-route track map keyed by pathname, defined in `content.ts`. Phase-3 ships with Pixabay CDN URLs for Home + Gameplay + Lore + Chat + a generic fallback for the rest; remaining pages use the fallback until you swap URLs.
+- Fixed-bottom-right collapsible player: play/pause, track title, volume slider, mute. Glass surface, cyan accent on active.
+- Autoplay rules: muted on first load; first user interaction anywhere unlocks a "🎵 Enable Music" prompt that fades in once. On route change: crossfade 600ms (volume ramp, no new audio element churn).
+- Lazy: `preload="none"`, load on first play; abort previous fetch on fast nav.
 
-`src/styles.css`:
-- `.glass` background → `rgba(255,255,255,0.03)`.
-- Remove `.glow-border-blue` hover styles; replace with border → `rgba(255,255,255,0.15)` on hover, 400ms.
-- Remove custom scrollbar rules.
-- Remove `.glow-text` usage from hero title (keep utility for other places that still need it — but stop applying it to titles per spec).
+---
 
-Across all section components:
-- Overline labels: `tracking-[0.2em]`, opacity 60%.
-- Section titles: 56px desktop (was 64).
-- Body copy: `leading-[1.9]`.
-- Cards: `rounded-2xl`; remove `scale-[1.02]` hovers; replace with `-translate-y-[3px]`, 400ms.
-- Feature icons: default color `--text-secondary`, color-on-hover (400ms).
-- Stats numbers: switch from `--plasma-cyan` to `--text-primary`.
-- `--plasma-cyan` reserved for logo + active nav link only.
+## Technical Notes (for the dev, not the user)
 
-Delete `src/components/CustomCursor.tsx` and its usage in `routes/index.tsx`.
+- Stack is **TanStack Start + TanStack Router**, not React Router DOM. The user's request says "React Router" — I'll honor the intent (client-side `<Link>` nav, no full reloads) using the existing TanStack `<Link>`. No router swap.
+- No new heavy deps. Adds: `ai-elements` primitives (Phase 2 only). Audio = native `HTMLAudioElement`.
+- Lovable AI Gateway key (`LOVABLE_API_KEY`) — will provision in Phase 2 if not already present.
+- No mock spinners, no third-party logos, no "made by" strings anywhere post-Phase-1.
+- Existing motion system in `src/lib/motion.ts`, `useSectionParallax`, `useMouseParallax`, page-transition blur in `__root.tsx` — all preserved verbatim.
 
-## 6. Footer (`src/components/sections/Footer.tsx`)
+**Out of scope:** rewriting the existing Hero/WorldPillars/Media scenes, backend persistence for chat, real audio files (using Pixabay URLs + you swap later), 12 unique class SVGs (reuse existing silhouette with color tint per class).
 
-Rewrite to three-column row:
-- Left: `VOIDBORN` (Rajdhani 700, 16px, `--text-muted`).
-- Center: `Story · Universe · Media` (Space Mono 11px, `--text-muted`).
-- Right: `Made by Anuga Weerasinghe` (Space Mono 11px, `--text-muted`).
+---
 
-Thin divider, then centered: `A game concept by Anthropic Games · Not a commercial release` (Space Mono 10px, `--text-muted`). Remove animated cyan sweep line and legal/platform columns.
-
-## Out of scope (do not touch)
-
-Stats section logic, ClassSilhouette / CosmicPanel / WarriorSilhouette internals (other than the ring removal noted), Story beat content structure, Media masonry markup beyond moving it to its page, any backend/data work.
-
-## Acceptance check
-
-- Build passes, 4 routes resolve, deleted components fully removed (no dangling imports).
-- No infinite glow/shimmer/conic animations remain except the two allowed loops.
-- Hero contains exactly one CTA and no badges/pre-title.
-- Footer contains no commercial copy.
+Approve and I'll start Phase 1.
