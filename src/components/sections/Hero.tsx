@@ -213,7 +213,7 @@ export function Hero() {
           className="mt-10"
         >
           <Link
-            to="/story"
+            to="/lore"
             className="font-display inline-flex h-11 items-center justify-center px-8 uppercase"
             style={{
               border: "1px solid rgba(255,255,255,0.2)",
