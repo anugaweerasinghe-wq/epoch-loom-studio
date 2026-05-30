@@ -1,7 +1,7 @@
 [build]
   command = "npm run build"
-  publish = ".vercel/output/static"   # Nitro still outputs .vercel, but Netlify reads it
-  functions = ".vercel/output/functions"
+  publish = "dist"                    # Nitro with netlify-edge outputs to "dist"
+  functions = "dist/server"
 
 [[redirects]]
   from = "/*"
