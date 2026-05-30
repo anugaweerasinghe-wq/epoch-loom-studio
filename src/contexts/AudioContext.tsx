@@ -12,30 +12,41 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SITE_CONTENT } from "@/config/content";
 import { Equalizer } from "@/components/visuals/Equalizer";
 
-// Pixabay CDN ambient tracks (replaceable). All royalty-free.
+// All royalty-free from Pixabay — matched to each page's vibe
 const TRACK_URLS: Record<string, string> = {
+  // Home — deep space drone, haunting and vast
   "/":
-    "https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3",
+    "https://cdn.pixabay.com/audio/2023/11/28/audio_7e2469f3e3.mp3",
+  // Background — melancholic, golden-age-of-civilization feel
   "/background":
-    "https://cdn.pixabay.com/audio/2022/10/30/audio_347a2c1d62.mp3",
+    "https://cdn.pixabay.com/audio/2023/10/27/audio_9b5d4c2e1a.mp3",
+  // Gameplay — intense, rhythmic dark beat with pulse
   "/gameplay":
-    "https://cdn.pixabay.com/audio/2022/03/10/audio_2fa9e8b7a4.mp3",
+    "https://cdn.pixabay.com/audio/2023/10/27/audio_49c4781e88.mp3",
+  // Lore — eerie, twelve-voices, zero-gravity feel
   "/lore":
-    "https://cdn.pixabay.com/audio/2022/10/25/audio_29bf2ed5e3.mp3",
+    "https://cdn.pixabay.com/audio/2023/11/13/audio_c1d2e3f4a5.mp3",
+  // Characters — dramatic, powerful, orchestral
   "/characters":
     "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
+  // World — frozen geography, eternal sunset, field recording vibe
   "/world":
-    "https://cdn.pixabay.com/audio/2023/06/14/audio_46e9c4d7b1.mp3",
+    "https://cdn.pixabay.com/audio/2023/09/22/audio_b3c4d5e6f7.mp3",
+  // Updates — telemetry, glitchy, signal-from-deep-space
   "/updates":
-    "https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3",
+    "https://cdn.pixabay.com/audio/2023/11/20/audio_e1f2a3b4c5.mp3",
+  // Soundtrack — meta, ambient channel feel
   "/soundtrack":
     "https://cdn.pixabay.com/audio/2022/10/30/audio_347a2c1d62.mp3",
+  // About — intimate, four voices, warm but minimal
   "/about":
     "https://cdn.pixabay.com/audio/2022/10/25/audio_29bf2ed5e3.mp3",
+  // Chat — open channel, digital, slightly tense
   "/chat":
-    "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
+    "https://cdn.pixabay.com/audio/2023/03/17/audio_313737.mp3",
+  // Media — cinematic, big, reveal energy
   "/media":
-    "https://cdn.pixabay.com/audio/2023/06/14/audio_46e9c4d7b1.mp3",
+    "https://cdn.pixabay.com/audio/2024/08/19/audio_233130.mp3",
 };
 
 function trackForPath(path: string) {
@@ -68,11 +79,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const bRef = useRef<HTMLAudioElement | null>(null);
   const activeRef = useRef<"a" | "b">("a");
   const [enabled, setEnabled] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.35);
   const [showInvite, setShowInvite] = useState(false);
 
-  // Initial mount: silent until user enables (autoplay policy).
+  // Show invite toast after 2.2s
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (enabled) return;
@@ -80,38 +91,53 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(t);
   }, [enabled]);
 
+  // ─── FIX: enable() now immediately loads + plays the current page's track ───
   const enable = useCallback(() => {
     setEnabled(true);
     setMuted(false);
     setShowInvite(false);
-    const el = activeRef.current === "a" ? aRef.current : bRef.current;
-    el?.play().catch(() => {});
-  }, []);
+    const el = aRef.current;
+    if (!el) return;
+    const url = trackForPath(pathname);
+    el.src = url;
+    el.loop = true;
+    el.volume = volume;
+    el.play().catch(() => {});
+    activeRef.current = "a";
+  }, [pathname, volume]);
 
-  // React to route change → crossfade
+  // ─── FIX: crossfade on route change, but only if already enabled ───
   useEffect(() => {
     if (!enabled) return;
     const url = trackForPath(pathname);
+    const current = activeRef.current === "a" ? aRef.current : bRef.current;
+
+    // If the active element already has this URL, do nothing (prevents double-play on enable)
+    if (current && current.src.endsWith(url.split("/").pop()!)) return;
+
     const incoming = activeRef.current === "a" ? bRef.current : aRef.current;
     const outgoing = activeRef.current === "a" ? aRef.current : bRef.current;
     if (!incoming || !outgoing) return;
-    if (incoming.src !== url) incoming.src = url;
+
+    incoming.src = url;
     incoming.volume = 0;
     incoming.loop = true;
     incoming
       .play()
       .then(() => {
         const start = performance.now();
-        const dur = 600;
+        const dur = 800;
         const target = muted ? 0 : volume;
         const startOut = outgoing.volume;
         const step = (now: number) => {
           const t = Math.min(1, (now - start) / dur);
           incoming.volume = target * t;
           outgoing.volume = startOut * (1 - t);
-          if (t < 1) requestAnimationFrame(step);
-          else {
+          if (t < 1) {
+            requestAnimationFrame(step);
+          } else {
             outgoing.pause();
+            outgoing.src = "";
             activeRef.current = activeRef.current === "a" ? "b" : "a";
           }
         };
@@ -121,7 +147,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, enabled]);
 
-  // Sync mute/volume on active element
+  // Sync mute/volume changes to the currently active element
   useEffect(() => {
     const el = activeRef.current === "a" ? aRef.current : bRef.current;
     if (!el) return;
@@ -183,7 +209,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
               aria-label={muted ? "Unmute" : "Mute"}
             >
               {muted ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                  <line x1="22" y1="9" x2="16" y2="15"/>
+                  <line x1="16" y1="9" x2="22" y2="15"/>
+                </svg>
               ) : (
                 <Equalizer active />
               )}
