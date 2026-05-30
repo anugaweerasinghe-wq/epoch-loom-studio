@@ -8,7 +8,7 @@ export default defineConfig({
   vite: {
     plugins: [
       nitro({
-        preset: "netlify",   // ← NETLIFY, not vercel
+        preset: "netlify-edge",   // Use edge preset for Netlify
       }),
     ],
   },
