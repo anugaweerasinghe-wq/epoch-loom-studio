@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Media } from "@/components/sections/Media";
 import { PageTitle } from "@/components/PageTitle";
 import { SITE_CONTENT } from "@/config/content";
+import { ParallaxBackdrop } from "@/components/visuals/ParallaxBackdrop";
 
 export const Route = createFileRoute("/media")({
   head: () => ({
@@ -24,10 +25,8 @@ export const Route = createFileRoute("/media")({
 function MediaPage() {
   return (
     <>
-      <section
-        className="relative flex items-center justify-center px-6 pt-[180px] pb-[60px]"
-        style={{ background: "var(--void-black)" }}
-      >
+      <ParallaxBackdrop tint="cyan" />
+      <section className="relative flex items-center justify-center px-6 pt-[180px] pb-[60px]">
         <PageTitle title={SITE_CONTENT.pages.media} />
       </section>
       <Media />

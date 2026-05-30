@@ -3,6 +3,10 @@ import { motion } from "framer-motion";
 import { PageTitle } from "@/components/PageTitle";
 import { SITE_CONTENT } from "@/config/content";
 import { EXPO_OUT } from "@/lib/motion";
+import { ParallaxBackdrop } from "@/components/visuals/ParallaxBackdrop";
+import { Equalizer } from "@/components/visuals/Equalizer";
+import { useAudio } from "@/contexts/AudioContext";
+import { useRouterState } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/soundtrack")({
   head: () => ({
@@ -16,18 +20,33 @@ export const Route = createFileRoute("/soundtrack")({
   component: SoundtrackPage,
 });
 
+// Per-track radial gradient cover art
+const COVERS = [
+  ["#4fc3f7", "#001018"],
+  ["#ffd54f", "#1a1208"],
+  ["#ce93d8", "#0d0518"],
+  ["#80deea", "#001018"],
+  ["#ffab40", "#1a0e08"],
+  ["#7c4dff", "#0a0518"],
+  ["#ff5252", "#180505"],
+  ["#a5d6a7", "#051208"],
+  ["#4fc3f7", "#001018"],
+];
+
 function SoundtrackPage() {
   const c = SITE_CONTENT.soundtrack;
+  const audio = useAudio();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+
   return (
     <>
-      <section
-        className="relative flex items-center justify-center px-6 pt-[180px] pb-[40px]"
-        style={{ background: "var(--void-black)" }}
-      >
+      <ParallaxBackdrop tint="purple" />
+
+      <section className="relative flex items-center justify-center px-6 pt-[180px] pb-[40px]">
         <PageTitle title={SITE_CONTENT.pages.soundtrack} />
       </section>
 
-      <section className="px-6 pb-[140px]" style={{ background: "var(--void-black)" }}>
+      <section className="px-6 pb-[140px]">
         <div className="mx-auto max-w-3xl">
           <motion.p
             initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
@@ -41,71 +60,112 @@ function SoundtrackPage() {
           </motion.p>
         </div>
 
-        <div className="mx-auto mt-20 max-w-4xl">
+        {/* Now-playing hero */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 1, ease: EXPO_OUT }}
+          className="glass relative mx-auto mt-20 max-w-2xl overflow-hidden rounded-2xl p-10 text-center"
+          style={{ borderColor: "rgba(79,195,247,0.18)" }}
+        >
           <div
-            className="font-mono-ui mb-4 grid grid-cols-[40px_1fr_1fr_60px] gap-4 px-6 text-[10px] uppercase tracking-[0.25em]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <span>№</span>
-            <span>TRACK</span>
-            <span className="hidden md:block">PAGE</span>
-            <span className="text-right md:hidden"> </span>
-            <span className="text-right">LEN</span>
+            className="absolute inset-0 opacity-50"
+            style={{
+              background:
+                "radial-gradient(ellipse at 50% 0%, rgba(124,77,255,0.25), transparent 60%)",
+            }}
+          />
+          <div className="relative flex flex-col items-center gap-5">
+            <div
+              className="font-mono-ui text-[10px] uppercase tracking-[0.3em]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              ▍ NOW PLAYING ON THIS PAGE
+            </div>
+            <Equalizer active={audio.enabled && !audio.muted} bars={9} />
+            <h3
+              className="font-display text-[32px] font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {c.tracks.find((t) => t.page === path)?.title ?? "Vega Drift"}
+            </h3>
+            {!audio.enabled && (
+              <button
+                onClick={audio.enable}
+                className="mt-2 rounded-md px-5 py-2 font-mono-ui text-[10.5px] uppercase tracking-[0.3em] transition-all hover:scale-[1.03]"
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(79,195,247,0.45)",
+                  color: "var(--plasma-cyan)",
+                }}
+              >
+                ◆ Open Channel
+              </button>
+            )}
           </div>
-          <div className="flex flex-col gap-px overflow-hidden rounded-2xl glass">
-            {c.tracks.map((t, i) => (
+        </motion.div>
+
+        {/* Track grid */}
+        <div className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {c.tracks.map((t, i) => {
+            const [c1, c2] = COVERS[i % COVERS.length];
+            const active = t.page === path;
+            return (
               <motion.div
                 key={t.id}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: i * 0.04, ease: EXPO_OUT }}
-                className="grid grid-cols-[40px_1fr_1fr_60px] items-center gap-4 px-6 py-5 transition-colors duration-300"
-                style={{ borderTop: i === 0 ? "none" : "1px solid rgba(255,255,255,0.04)" }}
-                whileHover={{ background: "rgba(79,195,247,0.04)" }}
+                initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
+                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.8, delay: i * 0.05, ease: EXPO_OUT }}
+                whileHover={{ y: -4 }}
+                className="glass group flex items-center gap-4 overflow-hidden rounded-2xl p-4"
+                style={{
+                  borderColor: active ? "rgba(79,195,247,0.4)" : undefined,
+                  transition: "border-color 400ms ease",
+                }}
               >
-                <span
-                  className="font-mono-ui text-[11px]"
-                  style={{ color: "var(--text-muted)" }}
+                <div
+                  className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-xl"
+                  style={{
+                    background: `radial-gradient(circle at 30% 30%, ${c1} 0%, ${c2} 80%)`,
+                    boxShadow: `0 0 20px ${c1}33`,
+                  }}
                 >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <div className="min-w-0">
+                  {active && audio.enabled && !audio.muted ? (
+                    <Equalizer active />
+                  ) : (
+                    <span
+                      className="font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em]"
+                      style={{ color: "#000", opacity: 0.7 }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
                   <div
-                    className="font-display text-[16px] font-bold tracking-[0.02em] truncate"
+                    className="font-display text-[15px] font-bold tracking-[0.02em] truncate"
                     style={{ color: "var(--text-primary)" }}
                   >
                     {t.title}
                   </div>
                   <div
-                    className="font-body text-[12px] leading-relaxed truncate"
+                    className="font-mono-ui mt-0.5 text-[9.5px] uppercase tracking-[0.25em] truncate"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {t.page}
+                  </div>
+                  <div
+                    className="mt-1 font-body text-[11.5px] leading-snug line-clamp-2"
                     style={{ color: "var(--text-muted)", fontWeight: 300 }}
                   >
                     {t.note}
                   </div>
                 </div>
-                <div
-                  className="font-mono-ui hidden text-[10.5px] uppercase tracking-[0.25em] md:block"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  {t.page}
-                </div>
-                <div
-                  className="font-mono-ui text-right text-[11px]"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {t.duration}
-                </div>
               </motion.div>
-            ))}
-          </div>
-
-          <p
-            className="mt-10 text-center font-mono-ui text-[10.5px] uppercase tracking-[0.25em]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            ◆ Audio system mounts in a later release · use the global player when available
-          </p>
+            );
+          })}
         </div>
       </section>
     </>
