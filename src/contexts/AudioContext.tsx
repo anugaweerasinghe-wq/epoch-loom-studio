@@ -12,41 +12,30 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SITE_CONTENT } from "@/config/content";
 import { Equalizer } from "@/components/visuals/Equalizer";
 
-// All royalty-free from Pixabay — matched to each page's vibe
+// Kevin MacLeod — incompetech.com — CC BY 4.0 (free, royalty-free)
 const TRACK_URLS: Record<string, string> = {
-  // Home — deep space drone, haunting and vast
-  "/":
-    "https://cdn.pixabay.com/audio/2023/11/28/audio_7e2469f3e3.mp3",
-  // Background — melancholic, golden-age-of-civilization feel
-  "/background":
-    "https://cdn.pixabay.com/audio/2023/10/27/audio_9b5d4c2e1a.mp3",
-  // Gameplay — intense, rhythmic dark beat with pulse
-  "/gameplay":
-    "https://cdn.pixabay.com/audio/2023/10/27/audio_49c4781e88.mp3",
-  // Lore — eerie, twelve-voices, zero-gravity feel
-  "/lore":
-    "https://cdn.pixabay.com/audio/2023/11/13/audio_c1d2e3f4a5.mp3",
+  // Home — vast, haunting, dying star energy
+  "/": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dark%20Star.mp3",
+  // Background — golden silence before the collapse
+  "/background": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Echoes%20of%20Time%20v2.mp3",
+  // Gameplay — pulse, intensity, void core charging
+  "/gameplay": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Devastation%20and%20Revenge.mp3",
+  // Lore — eerie, twelve voices, zero-gravity
+  "/lore": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dark%20Fog.mp3",
   // Characters — dramatic, powerful, orchestral
-  "/characters":
-    "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
-  // World — frozen geography, eternal sunset, field recording vibe
-  "/world":
-    "https://cdn.pixabay.com/audio/2023/09/22/audio_b3c4d5e6f7.mp3",
-  // Updates — telemetry, glitchy, signal-from-deep-space
-  "/updates":
-    "https://cdn.pixabay.com/audio/2023/11/20/audio_e1f2a3b4c5.mp3",
-  // Soundtrack — meta, ambient channel feel
-  "/soundtrack":
-    "https://cdn.pixabay.com/audio/2022/10/30/audio_347a2c1d62.mp3",
-  // About — intimate, four voices, warm but minimal
-  "/about":
-    "https://cdn.pixabay.com/audio/2022/10/25/audio_29bf2ed5e3.mp3",
-  // Chat — open channel, digital, slightly tense
-  "/chat":
-    "https://cdn.pixabay.com/audio/2023/03/17/audio_313737.mp3",
-  // Media — cinematic, big, reveal energy
-  "/media":
-    "https://cdn.pixabay.com/audio/2024/08/19/audio_233130.mp3",
+  "/characters": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Five%20Armies.mp3",
+  // World — frozen geography, eternal sunset
+  "/world": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Frozen%20Star.mp3",
+  // Updates — transmissions, telemetry, signals
+  "/updates": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Darkness%20is%20Coming.mp3",
+  // Soundtrack — meta ambient channel
+  "/soundtrack": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Deep%20Haze.mp3",
+  // About — four voices, intimate, minimal
+  "/about": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dreamy%20Flashback.mp3",
+  // Chat — open channel, tense digital
+  "/chat": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Cipher.mp3",
+  // Media — big, cinematic, reveal energy
+  "/media": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Epic%20Unease.mp3",
 };
 
 function trackForPath(path: string) {
@@ -83,7 +72,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [volume, setVolume] = useState(0.35);
   const [showInvite, setShowInvite] = useState(false);
 
-  // Show invite toast after 2.2s
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (enabled) return;
@@ -91,63 +79,57 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(t);
   }, [enabled]);
 
-  // ─── FIX: enable() now immediately loads + plays the current page's track ───
+  // ✅ FIX: enable() immediately loads + plays the correct track for current page
   const enable = useCallback(() => {
     setEnabled(true);
     setMuted(false);
     setShowInvite(false);
     const el = aRef.current;
     if (!el) return;
-    const url = trackForPath(pathname);
-    el.src = url;
+    el.src = trackForPath(pathname);
     el.loop = true;
     el.volume = volume;
     el.play().catch(() => {});
     activeRef.current = "a";
   }, [pathname, volume]);
 
-  // ─── FIX: crossfade on route change, but only if already enabled ───
+  // ✅ FIX: crossfade only fires on route changes after audio is enabled
   useEffect(() => {
     if (!enabled) return;
     const url = trackForPath(pathname);
-    const current = activeRef.current === "a" ? aRef.current : bRef.current;
-
-    // If the active element already has this URL, do nothing (prevents double-play on enable)
-    if (current && current.src.endsWith(url.split("/").pop()!)) return;
-
-    const incoming = activeRef.current === "a" ? bRef.current : aRef.current;
     const outgoing = activeRef.current === "a" ? aRef.current : bRef.current;
+    const incoming = activeRef.current === "a" ? bRef.current : aRef.current;
     if (!incoming || !outgoing) return;
+    // Don't crossfade if we're already on this track
+    if (outgoing.src.endsWith(encodeURIComponent(url.split("/").pop()!)) ||
+        outgoing.src === url) return;
 
     incoming.src = url;
     incoming.volume = 0;
     incoming.loop = true;
-    incoming
-      .play()
-      .then(() => {
-        const start = performance.now();
-        const dur = 800;
-        const target = muted ? 0 : volume;
-        const startOut = outgoing.volume;
-        const step = (now: number) => {
-          const t = Math.min(1, (now - start) / dur);
-          incoming.volume = target * t;
-          outgoing.volume = startOut * (1 - t);
-          if (t < 1) {
-            requestAnimationFrame(step);
-          } else {
-            outgoing.pause();
-            outgoing.src = "";
-            activeRef.current = activeRef.current === "a" ? "b" : "a";
-          }
-        };
-        requestAnimationFrame(step);
-      })
-      .catch(() => {});
+    incoming.play().then(() => {
+      const start = performance.now();
+      const dur = 800;
+      const target = muted ? 0 : volume;
+      const startOut = outgoing.volume;
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / dur);
+        incoming.volume = target * t;
+        outgoing.volume = startOut * (1 - t);
+        if (t < 1) {
+          requestAnimationFrame(step);
+        } else {
+          outgoing.pause();
+          outgoing.src = "";
+          activeRef.current = activeRef.current === "a" ? "b" : "a";
+        }
+      };
+      requestAnimationFrame(step);
+    }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, enabled]);
 
-  // Sync mute/volume changes to the currently active element
+  // Sync mute/volume to active element
   useEffect(() => {
     const el = activeRef.current === "a" ? aRef.current : bRef.current;
     if (!el) return;
@@ -162,7 +144,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       <audio ref={aRef} preload="none" crossOrigin="anonymous" />
       <audio ref={bRef} preload="none" crossOrigin="anonymous" />
 
-      {/* First-touch invite toast */}
       <AnimatePresence>
         {showInvite && !enabled && (
           <motion.button
@@ -189,7 +170,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* Mini-player */}
       <AnimatePresence>
         {enabled && (
           <motion.div
