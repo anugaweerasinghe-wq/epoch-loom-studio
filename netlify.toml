@@ -1,7 +1,10 @@
 [build]
-  publish = ".vercel/output/static"
+  command = "npm run build"
+  publish = ".vercel/output/static"   # Nitro still outputs .vercel, but Netlify reads it
+  functions = ".vercel/output/functions"
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/server"
   status = 200
+  force = true
