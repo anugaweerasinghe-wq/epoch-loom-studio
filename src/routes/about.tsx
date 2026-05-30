@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { PageTitle } from "@/components/PageTitle";
 import { SITE_CONTENT } from "@/config/content";
 import { EXPO_OUT } from "@/lib/motion";
+import { ParallaxBackdrop } from "@/components/visuals/ParallaxBackdrop";
+import { FloatingShards } from "@/components/visuals/FloatingShards";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -20,14 +22,16 @@ function AboutPage() {
   const c = SITE_CONTENT.about;
   return (
     <>
-      <section
-        className="relative flex items-center justify-center px-6 pt-[180px] pb-[40px]"
-        style={{ background: "var(--void-black)" }}
-      >
-        <PageTitle title={SITE_CONTENT.pages.about} />
+      <ParallaxBackdrop tint="cyan" />
+
+      <section className="relative flex items-center justify-center overflow-hidden px-6 pt-[180px] pb-[40px]">
+        <FloatingShards />
+        <div className="relative">
+          <PageTitle title={SITE_CONTENT.pages.about} />
+        </div>
       </section>
 
-      <section className="px-6 pb-[140px]" style={{ background: "var(--void-black)" }}>
+      <section className="px-6 pb-[140px]">
         <div className="mx-auto max-w-3xl">
           <motion.p
             initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
@@ -49,22 +53,36 @@ function AboutPage() {
               whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.9, delay: i * 0.08, ease: EXPO_OUT }}
-              whileHover={{ y: -4 }}
-              className="glass relative flex flex-col items-center rounded-2xl p-8 text-center"
+              whileHover={{ y: -6, transition: { duration: 0.3 } }}
+              className="glass group relative flex flex-col items-center overflow-hidden rounded-2xl p-8 text-center"
+              style={{ transition: "border-color 400ms ease" }}
             >
               <div
-                className="flex h-20 w-20 items-center justify-center rounded-full"
+                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 style={{
-                  background: "rgba(79,195,247,0.06)",
-                  border: "1px solid rgba(79,195,247,0.25)",
-                  color: "var(--plasma-cyan)",
+                  background:
+                    "radial-gradient(circle at 50% 0%, rgba(79,195,247,0.12), transparent 60%)",
                 }}
-              >
-                <span
-                  className="font-display text-[22px] font-bold tracking-[0.1em]"
+              />
+              <div className="relative">
+                <div
+                  className="absolute -inset-2 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{
+                    background: "radial-gradient(circle, rgba(79,195,247,0.25), transparent 70%)",
+                  }}
+                />
+                <div
+                  className="relative flex h-20 w-20 items-center justify-center rounded-full"
+                  style={{
+                    background: "rgba(79,195,247,0.06)",
+                    border: "1px solid rgba(79,195,247,0.35)",
+                    color: "var(--plasma-cyan)",
+                  }}
                 >
-                  {m.initials}
-                </span>
+                  <span className="font-display text-[22px] font-bold tracking-[0.1em]">
+                    {m.initials}
+                  </span>
+                </div>
               </div>
               <h3
                 className="mt-6 font-display text-[22px] font-bold"

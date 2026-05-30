@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/sections/Footer";
+import { AudioProvider } from "@/contexts/AudioContext";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -143,11 +144,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Navbar />
-      <main className="relative">
-        <AnimatedOutlet />
-      </main>
-      <Footer />
+      <AudioProvider>
+        <Navbar />
+        <main className="relative">
+          <AnimatedOutlet />
+        </main>
+        <Footer />
+      </AudioProvider>
     </QueryClientProvider>
   );
 }

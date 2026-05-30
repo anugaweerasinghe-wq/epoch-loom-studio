@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Story } from "@/components/sections/Story";
 import { PageTitle } from "@/components/PageTitle";
 import { SITE_CONTENT } from "@/config/content";
+import { ParallaxBackdrop } from "@/components/visuals/ParallaxBackdrop";
+import { FloatingShards } from "@/components/visuals/FloatingShards";
 
 export const Route = createFileRoute("/lore")({
   head: () => ({
@@ -18,17 +20,10 @@ export const Route = createFileRoute("/lore")({
 function LorePage() {
   return (
     <>
-      <section
-        className="relative flex items-center justify-center px-6 pt-[180px] pb-[40px]"
-        style={{ background: "var(--void-black)" }}
-      >
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse 80vw 60vh at 50% 30%, rgba(124,77,255,0.08), transparent 70%)",
-            animation: "ambient-drift 24s ease-in-out infinite",
-          }}
-        />
+      <ParallaxBackdrop tint="purple" />
+
+      <section className="relative flex items-center justify-center overflow-hidden px-6 pt-[180px] pb-[40px]">
+        <FloatingShards tint="var(--stellar-purple)" />
         <div className="relative">
           <PageTitle title={SITE_CONTENT.pages.lore} />
         </div>
