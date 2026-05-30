@@ -1,77 +1,91 @@
-# VOIDBORN — Premium Overhaul (Phased)
 
-Accent locked: **Plasma Cyan #4fc3f7**. Chatbot lives on `/chat` with a subtle nav entry + tiny pulse dot. Audio uses Pixabay CDN URLs with safe fallbacks. Delivered in three phases so each one can be QA'd before the next lands.
+# Phase 2 + Phase 3 + Visual Upgrade
 
----
-
-## Phase 1 — Architecture, Navigation, Content, About
-
-**Routing (TanStack file-based; project already uses TanStack, not React Router DOM — I'll keep the existing router and add files):**
-
-```
-src/routes/
-  index.tsx          (Home — keep current hero + pillars, light polish)
-  background.tsx     (NEW — origin of the Voidborn, pre-collapse history)
-  gameplay.tsx       (NEW — core loops, Void Absorption, Nova Collapse)
-  lore.tsx           (rename/repoint from /story — keep timeline beats)
-  characters.tsx     (expand /universe Classes to all 12 Voidborn)
-  world.tsx          (NEW — locations: Abyssal Trench, Neo Citadel, Golden Temple, Void Breach, Singularity, +others)
-  updates.tsx        (NEW — simple changelog/news feed, 4–5 entries)
-  soundtrack.tsx     (NEW — track list + lore per track, ties to global player)
-  about.tsx          (NEW — 4-person team grid)
-  chat.tsx           (NEW — placeholder shell in Phase 1, wired in Phase 2)
-  media.tsx          (KEEP)
-```
-
-- `/story` redirects to `/lore`, `/universe` redirects to `/characters` (zero broken links).
-- Sticky `Navbar.tsx` rebuilt: logo · Home · Background · Gameplay · Lore · Characters · World · Soundtrack · Updates · About · **Chat (• pulse dot)**. Collapses to hamburger sheet < lg. Existing reactive blur/opacity preserved.
-- All existing parallax, scroll-reveals, blur-in text, page-transition `AnimatePresence` — untouched.
-
-**Content expansion (cinematic placeholders, no Lorem):**
-- Extend `src/config/content.ts` with `background`, `gameplay`, `world`, `updates`, `soundtrack`, `about`, `characters12` keys.
-- 12 Voidborn classes fleshed out (Starbreaker, Chronoslip, Plasmaweave, Ashbinder, Hollowblade, Lightweaver, Gravewarden, Nullsong, Emberkin, Tidecaller, Voidwright, **The Thirteenth — [REDACTED]**).
-- 6–8 World locations with sector readouts in the same tone as existing Media scenes.
-
-**About page:** 4 glass cards (Sasindu, Yuthil, Risheli, Anuga) with role, one-line bio, monogram avatar (CSS), hover lift. Replaces every "made by" string. Footer becomes: `"Not a commercial release · About the team →"`.
-
-**Visual polish (no regressions):**
-- Confirm single accent = `--plasma-cyan` (logo, active nav, pulse dot, one hover state per surface).
-- Button hover: scale 1.02 + subtle cyan ring glow (400ms, GPU-only).
-- Card tilt: mouse-parallax 3D tilt ≤ 6° on `lg+` only, via existing `useMouseParallax` hook, opt-in per card.
-- Tighten spacing to `py-32` rhythm, audit blur layers to ≤ 2 stacked.
-
-## Phase 2 — AI Chatbot (`/chat`)
-
-- Full-page chat UI built with **AI Elements** (`conversation`, `message`, `prompt-input`, `shimmer`) — assistant messages no background, user bubble cyan-on-near-black, textarea auto-focused.
-- Server route: `src/routes/api/chat.ts` using `streamText` + Lovable AI Gateway, model `google/gemini-3-flash-preview`.
-- **Auto-learning context**: on each request, server reads `src/config/content.ts` (the single source of truth) and serializes the whole `SITE_CONTENT` object into the system prompt. When you edit lore tomorrow, the bot updates automatically — no reindex, no embeddings.
-- System prompt enforces:
-  - Persona: "charismatic in-universe Void guide".
-  - 1–3 sentences max, bullets/emojis sparingly.
-  - **Hard guardrail**: only answers about VOIDBORN: SHATTERED EPOCH; off-topic → polite refusal in-character.
-- localStorage transcript only (no DB, matches "free + built-in"). New-chat button clears it.
-- Subtle pulse-dot nav entry as picked.
-
-## Phase 3 — Global Soundtrack
-
-- `AudioProvider` (React context) mounted in `__root.tsx`, owns single `<audio>` element, survives page transitions.
-- Per-route track map keyed by pathname, defined in `content.ts`. Phase-3 ships with Pixabay CDN URLs for Home + Gameplay + Lore + Chat + a generic fallback for the rest; remaining pages use the fallback until you swap URLs.
-- Fixed-bottom-right collapsible player: play/pause, track title, volume slider, mute. Glass surface, cyan accent on active.
-- Autoplay rules: muted on first load; first user interaction anywhere unlocks a "🎵 Enable Music" prompt that fades in once. On route change: crossfade 600ms (volume ramp, no new audio element churn).
-- Lazy: `preload="none"`, load on first play; abort previous fetch on fast nav.
+Three things in one build. Home and Characters pages are NOT touched (already strong).
 
 ---
 
-## Technical Notes (for the dev, not the user)
+## Phase 2 — Live `/chat` agent
 
-- Stack is **TanStack Start + TanStack Router**, not React Router DOM. The user's request says "React Router" — I'll honor the intent (client-side `<Link>` nav, no full reloads) using the existing TanStack `<Link>`. No router swap.
-- No new heavy deps. Adds: `ai-elements` primitives (Phase 2 only). Audio = native `HTMLAudioElement`.
-- Lovable AI Gateway key (`LOVABLE_API_KEY`) — will provision in Phase 2 if not already present.
-- No mock spinners, no third-party logos, no "made by" strings anywhere post-Phase-1.
-- Existing motion system in `src/lib/motion.ts`, `useSectionParallax`, `useMouseParallax`, page-transition blur in `__root.tsx` — all preserved verbatim.
+**Backend**
+- Ensure `LOVABLE_API_KEY` via `ai_gateway--create`.
+- Add `bun add ai @ai-sdk/openai-compatible` (AI SDK + OpenAI-compatible adapter).
+- Create `src/lib/lovable-gateway.server.ts` with the canonical gateway helper (provider + run-id forwarding).
+- Create server route `src/routes/api/chat.ts` (TanStack server route, POST):
+  - Reads `SITE_CONTENT` from `src/config/content.ts` and serializes it into the system prompt → auto-learns every time content is edited.
+  - Hard guardrail: only answers questions about VOIDBORN; politely deflects unrelated queries.
+  - Model: `google/gemini-3-flash-preview`, `streamText` → `toUIMessageStreamResponse` wrapped with `withLovableAiGatewayRunIdHeader`.
 
-**Out of scope:** rewriting the existing Hero/WorldPillars/Media scenes, backend persistence for chat, real audio files (using Pixabay URLs + you swap later), 12 unique class SVGs (reuse existing silhouette with color tint per class).
+**Frontend (`src/routes/chat.tsx`)**
+- Install AI Elements via `bunx ai-elements@latest add conversation message prompt-input shimmer`.
+- Replace placeholder with full chat surface:
+  - `Conversation` / `ConversationContent` / `ConversationScrollButton`
+  - `Message` + `MessageContent` + `MessageResponse` (markdown streaming)
+  - `PromptInput` + `PromptInputTextarea` + `PromptInputFooter` + `PromptInputSubmit` (icon-sm)
+  - `Shimmer` text "Consulting the Archive…" while streaming
+- One conversation per browser, localStorage-persisted `UIMessage[]` (matches Phase 1 plan; no thread sidebar).
+- Custom empty state with a VOIDBORN sigil mark (not Sparkles) + 3 suggested-prompt chips ("What is the Thirteenth?", "Explain the Shattered Epoch", "Who built this game?").
+- Subtle cyan pulse dot already wired in navbar — no nav changes needed.
 
 ---
 
-Approve and I'll start Phase 1.
+## Phase 3 — Global ambient soundtrack
+
+- Create `src/contexts/AudioContext.tsx` with a single `<audio>` element mounted in `__root.tsx`.
+- Per-route track map in `src/config/content.ts → soundtrack.tracks` (Pixabay CDN MP3 URLs for `/`, `/gameplay`, `/lore`, `/background`, `/world`, `/chat`; reuses for the rest).
+- Behavior:
+  - Mounts muted on first load (browser autoplay policy safe).
+  - First user gesture anywhere → reveals a one-time "🎵 Enable Ambient Audio" toast (bottom-right, cyan border).
+  - Fixed bottom-right collapsible mini-player: play/pause, volume slider, track name. Glass styling.
+  - Route change → 600ms crossfade (two `<audio>` elements ping-pong, fade via `gain`-style volume tween, not Web Audio).
+  - `preload="none"` for non-active tracks; lazy-loads on activation.
+
+---
+
+## Visual upgrade pass (NOT Home, NOT Characters)
+
+Goal: cinematic depth without perf regression. Reuse existing scene components and motion primitives — no new heavy deps.
+
+**Shared additions**
+- New `src/components/visuals/ParallaxBackdrop.tsx`: layered SVG starfield + slow drifting nebula gradient, `useSectionParallax` driven, `will-change: transform`, `translateZ(0)`. Single instance per page, opacity ≤ 0.35.
+- New `src/components/visuals/GlassPanel.tsx`: shared border-glow + cyan-edge variant of `.glass` for hero/feature cards.
+- New `src/components/visuals/FloatingShards.tsx`: 6–10 rotating SVG shards, GPU-only, scoped per section.
+- New `src/components/visuals/SectionDivider.tsx`: animated cyan hairline that scales in on scroll.
+
+**Per-page**
+
+| Page | Additions |
+|---|---|
+| `/background` | Page-wide `ParallaxBackdrop`. Each chapter card gets a era-themed scene preview (reuse `VoidBreach`, `TheSingularity`, `GoldenTemple`, `NeoCitadel` from `media/scenes`) at 240px height, glass overlay caption. Vertical timeline rail with pulsing cyan nodes between chapters. |
+| `/gameplay` | Hero strip with `NeoCitadel` scene as backdrop + glass HUD overlay. Feature blocks alternate left/right with mouse-parallax tilt (≤ 6°) on `lg+`. Animated stat counters with cyan underline reveal. |
+| `/lore` | `ParallaxBackdrop` (purple-tinted). Chapter cards on a vertical glowing rift line. `FloatingShards` drifting behind text. |
+| `/world` | Each location card uses one of the scene components as cover image with `SceneHUD` always-on. Grid uses `bento-grid` density (2-2-1-1-2). Hover = scale 1.02 + cyan border. |
+| `/updates` | Add a left-side timeline rail (vertical cyan line + node per entry). Background `ParallaxBackdrop`. Each card gets a top-right scene thumbnail (32px circular) for visual rhythm. |
+| `/soundtrack` | Equalizer-bar SVG animation pulsing per track. Cover-art generated via radial gradients per track. Now-playing glass card centered, ambient blur halo. |
+| `/about` | Team grid: avatar tiles get cyan ring on hover, role badge in mono-ui. Background = subtle `ParallaxBackdrop`. Add a "The Collective" hero strip with `FloatingShards`. |
+| `/media` | Already has scenes; add page-wide `ParallaxBackdrop` + scene-to-scene transition fade via `AnimatePresence`. |
+| `/chat` | Ambient `ParallaxBackdrop` (low opacity 0.15). Glass chat surface with cyan edge glow on focus. |
+
+**Perf budget**
+- Max 1 `ParallaxBackdrop` per page.
+- Max 2 `backdrop-filter` layers stacked anywhere.
+- All loops `transform`/`opacity` only, GPU composited.
+- `prefers-reduced-motion` disables parallax + drift loops (already honored by `useSectionParallax`).
+
+---
+
+## Technical details
+
+- Stack: TanStack Start + TanStack Router, AI SDK via Lovable Gateway, framer-motion (already installed).
+- New deps: `ai`, `@ai-sdk/openai-compatible`. AI Elements installed via CLI (no manual dep).
+- Files created: ~15 (1 server route, 1 gateway helper, 1 audio context, 4 visual components, AI Elements components, plus per-page visual integrations).
+- Files edited: `__root.tsx` (audio mount), `chat.tsx`, `content.ts` (soundtrack map + per-page scene refs), 7 route files for visual integration.
+- NOT touched: `routes/index.tsx`, `routes/characters.tsx`, `components/sections/Hero.tsx`, `components/sections/WorldPillars.tsx`, `components/media/scenes/*`.
+
+## Out of scope
+- Backend persistence of chat history (localStorage only).
+- Real licensed music (Pixabay URLs; user swaps later).
+- New scene components (reuse the 5 existing ones).
+- 3D / WebGL.
+
+Reply **"go"** to execute all three in one build.
