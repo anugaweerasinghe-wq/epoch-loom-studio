@@ -1,9 +1,0 @@
-name = "gametheorist"
-compatibility_date = "2025-01-09"
-
-[pages]
-  build_command = "npm run build"
-  output_dir = "dist"
-
-[env.production]
-  routes = ["*/*"]
