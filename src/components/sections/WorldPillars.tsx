@@ -14,39 +14,88 @@ function PillarBand({ pillar, index }: { pillar: typeof SITE_CONTENT.home.pillar
   return (
     <div ref={ref} className="relative">
       <div
-        className={`mx-auto grid max-w-7xl items-center gap-10 px-6 lg:gap-16 ${isRight ? "lg:grid-cols-[1.2fr_1fr]" : "lg:grid-cols-[1fr_1.2fr]"}`}
+        className={`mx-auto grid max-w-7xl items-center gap-12 px-6 lg:gap-20 ${isRight ? "lg:grid-cols-[1.15fr_1fr]" : "lg:grid-cols-[1fr_1.15fr]"}`}
       >
-        {/* Scene */}
+        {/* Scene — cinematic framed plate */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 40 }}
+          initial={{ opacity: 0, scale: 0.94, y: 60 }}
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 1.1, ease: EXPO_OUT }}
-          className={`relative h-[300px] w-full overflow-hidden rounded-2xl ${isRight ? "lg:order-2" : "lg:order-1"}`}
-          style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+          transition={{ duration: 1.2, ease: EXPO_OUT }}
+          className={`group relative h-[380px] w-full overflow-hidden rounded-[28px] ${isRight ? "lg:order-2" : "lg:order-1"}`}
+          style={{
+            border: "1px solid rgba(79,195,247,0.18)",
+            boxShadow:
+              "0 30px 80px -30px rgba(0,0,0,0.8), 0 0 60px -20px rgba(79,195,247,0.25), inset 0 1px 0 rgba(255,255,255,0.06)",
+          }}
         >
+          {/* Parallax scene art */}
           <motion.div className="absolute inset-[-10%] h-[120%] w-[120%]" style={{ y }}>
             <Scene />
           </motion.div>
+
+          {/* Glass top sheen */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(255,255,255,0.06), transparent)",
+            }}
+          />
+
+          {/* Bottom vignette + index plate */}
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(5,5,15,0.85), transparent)",
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-6 pb-5">
+            <span
+              className="font-mono-ui text-[10px] uppercase tracking-[0.3em]"
+              style={{ color: "var(--text-secondary)", opacity: 0.85 }}
+            >
+              {String(index + 1).padStart(2, "0")} / {String(SITE_CONTENT.home.pillars.length).padStart(2, "0")}
+            </span>
+            <span
+              className="font-mono-ui text-[10px] uppercase tracking-[0.3em]"
+              style={{ color: "var(--plasma-cyan)" }}
+            >
+              ◆ {pillar.label}
+            </span>
+          </div>
+
+          {/* Hover cyan rim */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-[28px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            style={{
+              boxShadow: "inset 0 0 0 1px rgba(79,195,247,0.45)",
+            }}
+          />
         </motion.div>
 
         {/* Text */}
         <div className={isRight ? "lg:order-1" : "lg:order-2"}>
           <motion.div
             {...textReveal}
-            className="font-mono-ui text-[10px] uppercase"
-            style={{ color: "var(--text-secondary)", opacity: 0.6, letterSpacing: "0.25em" }}
+            className="font-mono-ui flex items-center gap-3 text-[10px] uppercase"
+            style={{ color: "var(--text-secondary)", opacity: 0.7, letterSpacing: "0.28em" }}
           >
+            <span
+              className="inline-block h-px w-8"
+              style={{ background: "var(--plasma-cyan)", opacity: 0.6 }}
+            />
             {pillar.label}
           </motion.div>
           <motion.h3
             {...textReveal}
             transition={{ ...textReveal.transition, delay: 0.1 }}
-            className="font-display mt-4 font-bold tracking-tight"
+            className="font-display mt-5 font-bold tracking-tight"
             style={{
               color: "var(--text-primary)",
-              fontSize: "clamp(28px, 4vw, 40px)",
-              lineHeight: 1.15,
+              fontSize: "clamp(28px, 4vw, 44px)",
+              lineHeight: 1.12,
             }}
           >
             {pillar.title}
@@ -70,8 +119,8 @@ function PillarBand({ pillar, index }: { pillar: typeof SITE_CONTENT.home.pillar
                 className="font-mono-ui rounded-full px-3 py-1.5 text-[9px] uppercase"
                 style={{
                   color: "var(--text-muted)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(79,195,247,0.18)",
+                  background: "rgba(79,195,247,0.04)",
                   letterSpacing: "0.2em",
                 }}
               >
@@ -87,6 +136,7 @@ function PillarBand({ pillar, index }: { pillar: typeof SITE_CONTENT.home.pillar
     </div>
   );
 }
+
 
 export function WorldPillars() {
   return (
