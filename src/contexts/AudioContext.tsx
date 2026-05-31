@@ -12,30 +12,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SITE_CONTENT } from "@/config/content";
 import { Equalizer } from "@/components/visuals/Equalizer";
 
-// Kevin MacLeod — incompetech.com — CC BY 4.0 (free, royalty-free)
+// Kevin MacLeod — incompetech.com — CC BY 4.0 (free, royalty-free).
+// NOTE: incompetech does not send CORS headers, so the <audio> elements
+// must NOT use crossOrigin="anonymous" or playback is silently blocked.
+const BASE = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/";
 const TRACK_URLS: Record<string, string> = {
-  // Home — vast, haunting, dying star energy
-  "/": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dark%20Star.mp3",
-  // Background — golden silence before the collapse
-  "/background": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Echoes%20of%20Time%20v2.mp3",
-  // Gameplay — pulse, intensity, void core charging
-  "/gameplay": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Devastation%20and%20Revenge.mp3",
-  // Lore — eerie, twelve voices, zero-gravity
-  "/lore": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dark%20Fog.mp3",
-  // Characters — dramatic, powerful, orchestral
-  "/characters": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Five%20Armies.mp3",
-  // World — frozen geography, eternal sunset
-  "/world": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Frozen%20Star.mp3",
-  // Updates — transmissions, telemetry, signals
-  "/updates": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Darkness%20is%20Coming.mp3",
-  // Soundtrack — meta ambient channel
-  "/soundtrack": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Deep%20Haze.mp3",
-  // About — four voices, intimate, minimal
-  "/about": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dreamy%20Flashback.mp3",
-  // Chat — open channel, tense digital
-  "/chat": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Cipher.mp3",
-  // Media — big, cinematic, reveal energy
-  "/media": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Epic%20Unease.mp3",
+  "/":            BASE + "Dark%20Star.mp3",
+  "/background":  BASE + "Echoes%20of%20Time%20v2.mp3",
+  "/gameplay":    BASE + "Devastation%20and%20Revenge.mp3",
+  "/lore":        BASE + "Dark%20Fog.mp3",
+  "/characters":  BASE + "Five%20Armies.mp3",
+  "/world":       BASE + "Frozen%20Star.mp3",
+  "/updates":     BASE + "Darkness%20is%20Coming.mp3",
+  "/soundtrack":  BASE + "Deep%20Haze.mp3",
+  "/about":       BASE + "Dreamy%20Flashback.mp3",
+  // Cipher.mp3 returns 404 — swap for a working tense/digital track.
+  "/chat":        BASE + "Hitman.mp3",
+  "/media":       BASE + "Epic%20Unease.mp3",
 };
 
 function trackForPath(path: string) {
