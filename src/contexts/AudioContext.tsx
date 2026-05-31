@@ -60,6 +60,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const aRef = useRef<HTMLAudioElement | null>(null);
   const bRef = useRef<HTMLAudioElement | null>(null);
   const activeRef = useRef<"a" | "b">("a");
+  const currentUrlRef = useRef<string>("");
   const [enabled, setEnabled] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.35);
@@ -72,53 +73,67 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(t);
   }, [enabled]);
 
-  // ✅ FIX: enable() immediately loads + plays the correct track for current page
+  // enable() — load + play the correct track for the current page on first user gesture
   const enable = useCallback(() => {
     setEnabled(true);
     setMuted(false);
     setShowInvite(false);
     const el = aRef.current;
     if (!el) return;
-    el.src = trackForPath(pathname);
+    const url = trackForPath(pathname);
+    el.src = url;
     el.loop = true;
     el.volume = volume;
-    el.play().catch(() => {});
+    el.play().catch((err) => {
+      console.warn("[audio] enable play failed", err);
+    });
     activeRef.current = "a";
+    currentUrlRef.current = url;
   }, [pathname, volume]);
 
-  // ✅ FIX: crossfade only fires on route changes after audio is enabled
+  // Crossfade on route change after enable
   useEffect(() => {
     if (!enabled) return;
     const url = trackForPath(pathname);
+    if (currentUrlRef.current === url) return;
+
     const outgoing = activeRef.current === "a" ? aRef.current : bRef.current;
     const incoming = activeRef.current === "a" ? bRef.current : aRef.current;
     if (!incoming || !outgoing) return;
-    // Don't crossfade if we're already on this track
-    if (outgoing.src.endsWith(encodeURIComponent(url.split("/").pop()!)) ||
-        outgoing.src === url) return;
 
     incoming.src = url;
     incoming.volume = 0;
     incoming.loop = true;
-    incoming.play().then(() => {
-      const start = performance.now();
-      const dur = 800;
-      const target = muted ? 0 : volume;
-      const startOut = outgoing.volume;
+    currentUrlRef.current = url;
+
+    const target = muted ? 0 : volume;
+    const startOut = outgoing.volume;
+    const startTime = performance.now();
+    const dur = 800;
+
+    const runFade = () => {
       const step = (now: number) => {
-        const t = Math.min(1, (now - start) / dur);
+        const t = Math.min(1, (now - startTime) / dur);
         incoming.volume = target * t;
         outgoing.volume = startOut * (1 - t);
         if (t < 1) {
           requestAnimationFrame(step);
         } else {
-          outgoing.pause();
-          outgoing.src = "";
+          try { outgoing.pause(); } catch {}
+          outgoing.removeAttribute("src");
+          outgoing.load();
           activeRef.current = activeRef.current === "a" ? "b" : "a";
         }
       };
       requestAnimationFrame(step);
-    }).catch(() => {});
+    };
+
+    incoming
+      .play()
+      .then(runFade)
+      .catch((err) => {
+        console.warn("[audio] crossfade play failed", err);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, enabled]);
 
@@ -134,8 +149,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={{ enabled, enable, muted, setMuted, volume, setVolume }}>
       {children}
-      <audio ref={aRef} preload="none" crossOrigin="anonymous" />
-      <audio ref={bRef} preload="none" crossOrigin="anonymous" />
+      {/* No crossOrigin — the audio host (incompetech) does not send CORS headers,
+          and setting crossOrigin="anonymous" silently blocks playback. */}
+      <audio ref={aRef} preload="none" />
+      <audio ref={bRef} preload="none" />
+
 
       <AnimatePresence>
         {showInvite && !enabled && (
