@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { Menu, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SITE_CONTENT } from "@/config/content";
+import { VoidMark } from "@/components/VoidMark";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -37,11 +38,13 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-6">
         <Link
           to="/"
-          className="font-display text-[18px] font-bold tracking-[0.15em]"
+          className="font-display flex items-center gap-2.5 text-[18px] font-bold tracking-[0.15em]"
           style={{ color: "var(--plasma-cyan)" }}
         >
-          {SITE_CONTENT.game.title}
+          <VoidMark size={22} />
+          <span>{SITE_CONTENT.game.title}</span>
         </Link>
+
 
         <div className="hidden items-center gap-7 xl:flex">
           {SITE_CONTENT.nav.links.map((l) => (

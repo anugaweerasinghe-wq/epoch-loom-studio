@@ -1,21 +1,31 @@
 import { Link } from "@tanstack/react-router";
 import { SITE_CONTENT } from "@/config/content";
+import { VoidMark } from "@/components/VoidMark";
 
 export function Footer() {
   return (
     <footer
-      className="relative px-6 py-10"
+      className="relative px-6 py-12"
       style={{
         background: "var(--void-black)",
         borderTop: "1px solid rgba(255,255,255,0.06)",
       }}
     >
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 text-center">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 text-center">
         <div
-          className="font-display text-[14px] font-bold tracking-[0.2em]"
+          className="flex items-center gap-2.5"
+          style={{ color: "var(--plasma-cyan)" }}
+        >
+          <VoidMark size={20} />
+          <span className="font-display text-[14px] font-bold tracking-[0.2em]">
+            {SITE_CONTENT.game.title}
+          </span>
+        </div>
+        <div
+          className="font-display text-[12px] font-bold tracking-[0.25em]"
           style={{ color: "var(--text-muted)" }}
         >
-          {SITE_CONTENT.game.title} · {SITE_CONTENT.game.subtitle}
+          {SITE_CONTENT.game.subtitle}
         </div>
         <div
           className="font-mono-ui text-[10px] uppercase tracking-[0.25em]"
