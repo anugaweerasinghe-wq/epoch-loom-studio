@@ -12,30 +12,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SITE_CONTENT } from "@/config/content";
 import { Equalizer } from "@/components/visuals/Equalizer";
 
-// Kevin MacLeod — incompetech.com — CC BY 4.0 (free, royalty-free)
+// Kevin MacLeod — incompetech.com — CC BY 4.0 (free, royalty-free).
+// NOTE: incompetech does not send CORS headers, so the <audio> elements
+// must NOT use crossOrigin="anonymous" or playback is silently blocked.
+const BASE = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/";
 const TRACK_URLS: Record<string, string> = {
-  // Home — vast, haunting, dying star energy
-  "/": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dark%20Star.mp3",
-  // Background — golden silence before the collapse
-  "/background": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Echoes%20of%20Time%20v2.mp3",
-  // Gameplay — pulse, intensity, void core charging
-  "/gameplay": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Devastation%20and%20Revenge.mp3",
-  // Lore — eerie, twelve voices, zero-gravity
-  "/lore": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dark%20Fog.mp3",
-  // Characters — dramatic, powerful, orchestral
-  "/characters": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Five%20Armies.mp3",
-  // World — frozen geography, eternal sunset
-  "/world": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Frozen%20Star.mp3",
-  // Updates — transmissions, telemetry, signals
-  "/updates": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Darkness%20is%20Coming.mp3",
-  // Soundtrack — meta ambient channel
-  "/soundtrack": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Deep%20Haze.mp3",
-  // About — four voices, intimate, minimal
-  "/about": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dreamy%20Flashback.mp3",
-  // Chat — open channel, tense digital
-  "/chat": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Cipher.mp3",
-  // Media — big, cinematic, reveal energy
-  "/media": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Epic%20Unease.mp3",
+  "/":            BASE + "Dark%20Star.mp3",
+  "/background":  BASE + "Echoes%20of%20Time%20v2.mp3",
+  "/gameplay":    BASE + "Devastation%20and%20Revenge.mp3",
+  "/lore":        BASE + "Dark%20Fog.mp3",
+  "/characters":  BASE + "Five%20Armies.mp3",
+  "/world":       BASE + "Frozen%20Star.mp3",
+  "/updates":     BASE + "Darkness%20is%20Coming.mp3",
+  "/soundtrack":  BASE + "Deep%20Haze.mp3",
+  "/about":       BASE + "Dreamy%20Flashback.mp3",
+  // Cipher.mp3 returns 404 — swap for a working tense/digital track.
+  "/chat":        BASE + "Hitman.mp3",
+  "/media":       BASE + "Epic%20Unease.mp3",
 };
 
 function trackForPath(path: string) {
@@ -67,6 +60,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const aRef = useRef<HTMLAudioElement | null>(null);
   const bRef = useRef<HTMLAudioElement | null>(null);
   const activeRef = useRef<"a" | "b">("a");
+  const currentUrlRef = useRef<string>("");
   const [enabled, setEnabled] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.35);
@@ -79,53 +73,67 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(t);
   }, [enabled]);
 
-  // ✅ FIX: enable() immediately loads + plays the correct track for current page
+  // enable() — load + play the correct track for the current page on first user gesture
   const enable = useCallback(() => {
     setEnabled(true);
     setMuted(false);
     setShowInvite(false);
     const el = aRef.current;
     if (!el) return;
-    el.src = trackForPath(pathname);
+    const url = trackForPath(pathname);
+    el.src = url;
     el.loop = true;
     el.volume = volume;
-    el.play().catch(() => {});
+    el.play().catch((err) => {
+      console.warn("[audio] enable play failed", err);
+    });
     activeRef.current = "a";
+    currentUrlRef.current = url;
   }, [pathname, volume]);
 
-  // ✅ FIX: crossfade only fires on route changes after audio is enabled
+  // Crossfade on route change after enable
   useEffect(() => {
     if (!enabled) return;
     const url = trackForPath(pathname);
+    if (currentUrlRef.current === url) return;
+
     const outgoing = activeRef.current === "a" ? aRef.current : bRef.current;
     const incoming = activeRef.current === "a" ? bRef.current : aRef.current;
     if (!incoming || !outgoing) return;
-    // Don't crossfade if we're already on this track
-    if (outgoing.src.endsWith(encodeURIComponent(url.split("/").pop()!)) ||
-        outgoing.src === url) return;
 
     incoming.src = url;
     incoming.volume = 0;
     incoming.loop = true;
-    incoming.play().then(() => {
-      const start = performance.now();
-      const dur = 800;
-      const target = muted ? 0 : volume;
-      const startOut = outgoing.volume;
+    currentUrlRef.current = url;
+
+    const target = muted ? 0 : volume;
+    const startOut = outgoing.volume;
+    const startTime = performance.now();
+    const dur = 800;
+
+    const runFade = () => {
       const step = (now: number) => {
-        const t = Math.min(1, (now - start) / dur);
+        const t = Math.min(1, (now - startTime) / dur);
         incoming.volume = target * t;
         outgoing.volume = startOut * (1 - t);
         if (t < 1) {
           requestAnimationFrame(step);
         } else {
-          outgoing.pause();
-          outgoing.src = "";
+          try { outgoing.pause(); } catch {}
+          outgoing.removeAttribute("src");
+          outgoing.load();
           activeRef.current = activeRef.current === "a" ? "b" : "a";
         }
       };
       requestAnimationFrame(step);
-    }).catch(() => {});
+    };
+
+    incoming
+      .play()
+      .then(runFade)
+      .catch((err) => {
+        console.warn("[audio] crossfade play failed", err);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, enabled]);
 
@@ -141,8 +149,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={{ enabled, enable, muted, setMuted, volume, setVolume }}>
       {children}
-      <audio ref={aRef} preload="none" crossOrigin="anonymous" />
-      <audio ref={bRef} preload="none" crossOrigin="anonymous" />
+      {/* No crossOrigin — the audio host (incompetech) does not send CORS headers,
+          and setting crossOrigin="anonymous" silently blocks playback. */}
+      <audio ref={aRef} preload="none" />
+      <audio ref={bRef} preload="none" />
+
 
       <AnimatePresence>
         {showInvite && !enabled && (
