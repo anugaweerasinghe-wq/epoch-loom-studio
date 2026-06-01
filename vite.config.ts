@@ -1,11 +1,11 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// Deploy target: Vercel by default, Cloudflare in the Lovable sandbox.
-// Override with NITRO_PRESET=cloudflare-module if needed.
-const preset =
-  process.env.NITRO_PRESET ??
-  (process.env.VERCEL || process.env.NOW_BUILDER ? "vercel" : "vercel");
+// Deploy target: use Vercel preset when building on Vercel, otherwise
+// fall back to the Lovable sandbox default (cloudflare-module). This keeps
+// the Lovable preview/published site working unchanged.
+const isVercel = !!process.env.VERCEL;
+const presetOverride = process.env.NITRO_PRESET ?? (isVercel ? "vercel" : undefined);
 
-export default defineConfig({
-  nitro: { preset },
-});
+export default defineConfig(
+  presetOverride ? { nitro: { preset: presetOverride } } : {},
+);
