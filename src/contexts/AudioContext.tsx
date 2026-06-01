@@ -15,8 +15,8 @@ import { Equalizer } from "@/components/visuals/Equalizer";
 const BASE = "https://incompetech.com/music/royalty-free/mp3-royaltyfree/";
 
 // One consistent ambient track for the entire site.
-const AMBIENT_URL = BASE + "Dark%20Star.mp3";
-const AMBIENT_TITLE = "Dark Star";
+const AMBIENT_URL = BASE + "Epic%20Unease.mp3";
+const AMBIENT_TITLE = "Epic Unease";
 
 // Catalog of additional tracks the Soundtrack page can preview.
 export const TRACK_CATALOG: { id: string; title: string; url: string; note: string }[] = [

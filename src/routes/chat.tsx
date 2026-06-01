@@ -220,8 +220,8 @@ function ChatPage() {
                   }}
                   disabled={disabled}
                   placeholder={c.placeholder}
-                  className="flex-1 resize-none bg-transparent font-body text-[14.5px] leading-[1.6] outline-none placeholder:opacity-50 disabled:opacity-60"
-                  style={{ color: "var(--text-primary)", maxHeight: 140 }}
+                  className="flex-1 resize-none bg-transparent font-body text-[15px] font-medium leading-[1.6] outline-none placeholder:opacity-50 disabled:opacity-60"
+                  style={{ color: "#ffffff", maxHeight: 140, textShadow: "0 0 1px rgba(255,255,255,0.4)" }}
                 />
                 <button
                   onClick={() => void submit()}
