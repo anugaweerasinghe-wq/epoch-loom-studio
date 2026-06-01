@@ -160,9 +160,15 @@ export function Hero() {
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.2, ease: EXPO_OUT }}
           style={{
-            color: "var(--text-primary)",
             fontSize: "clamp(48px, 10vw, 96px)",
             y: smoothTitleY,
+            backgroundImage:
+              "linear-gradient(180deg, #ffffff 0%, #e8f4ff 35%, #9ecbe6 70%, #4fc3f7 100%)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            color: "transparent",
+            filter: "drop-shadow(0 0 30px rgba(79,195,247,0.25)) drop-shadow(0 2px 1px rgba(0,0,0,0.5))",
           }}
           className="font-display font-bold leading-[0.95] tracking-[0.02em]"
         >
